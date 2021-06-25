@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="BenchmarkDotNet.Core" />
+    <None Remove="BenchmarkDotNet" />
+    <None Remove="PriorityQueue\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.13.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CherryCollections\CherryCollections.csproj" />
+  </ItemGroup>
+</Project>

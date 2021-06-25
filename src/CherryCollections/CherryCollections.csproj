@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net5.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <Configurations>Release;Debug</Configurations>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
+        <PackageProjectUrl>https://github.com/apoorvkhurasia/cherry</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/apoorvkhurasia/cherry</RepositoryUrl>
+        <RepositoryType>Git</RepositoryType>
+        <Description>Library that provides collections and algorithms missing in the .Net SDK</Description>
+        <Copyright>Apoorv Khurasia</Copyright>
+        <NeutralLanguage>en</NeutralLanguage>
+        <SignAssembly>false</SignAssembly>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+      <DebugType></DebugType>
+      <WarningLevel>4</WarningLevel>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+      <DefineConstants>DEBUG;TRACE</DefineConstants>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <None Include="..\..\LICENSE">
+        <Pack>True</Pack>
+        <PackagePath></PackagePath>
+      </None>
+    </ItemGroup>
+</Project>
