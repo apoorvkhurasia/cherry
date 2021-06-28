@@ -1,8 +1,9 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Cherry.Collection;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 
-namespace CherryCollections.Tests
+namespace Cherry.Tests.Collections
 {
     [TestClass]
     public class ListExtensionTests

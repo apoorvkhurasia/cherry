@@ -1,4 +1,6 @@
-namespace CherryCollections
+using System.Runtime.Serialization;
+
+namespace Cherry
 {
     internal static class StandardExceptionMessages
     {
@@ -7,5 +9,6 @@ namespace CherryCollections
         internal static readonly string NoElemsInCollection = "No elements in this collection.";
         internal static readonly string KeySmallerThanCurrKey = "New key is smaller than current key.";
         internal static readonly string IndexLargerThanCount = "Index must be at least one less than the number of items.";
+        internal static readonly string ReadOnlyCollection = "This collection is a read-only collection";
     }
 }

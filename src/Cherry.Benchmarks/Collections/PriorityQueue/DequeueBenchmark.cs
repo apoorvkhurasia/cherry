@@ -2,8 +2,9 @@
 using System.Linq;
 
 using BenchmarkDotNet.Attributes;
+using Cherry.Collection;
 
-namespace CherryCollections.Benchmarks.PriorityQueue
+namespace Cherry.Benchmarks.PriorityQueue
 {
     public class DequeueBenchmark : AbstractPriorityQueueBenchmark
     {

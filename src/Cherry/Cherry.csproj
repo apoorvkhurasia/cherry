@@ -26,9 +26,19 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <None Remove="Collections\" />
+      <None Remove="Math\" />
+      <None Remove="Collections\Uncountable\" />
+    </ItemGroup>
+    <ItemGroup>
       <None Include="..\..\LICENSE">
         <Pack>True</Pack>
         <PackagePath></PackagePath>
       </None>
+    </ItemGroup>
+    <ItemGroup>
+      <Folder Include="Collections\" />
+      <Folder Include="Math\" />
+      <Folder Include="Collections\Dense\" />
     </ItemGroup>
 </Project>

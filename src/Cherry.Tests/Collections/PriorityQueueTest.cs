@@ -3,10 +3,10 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-
+using Cherry.Collection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CherryCollections.Tests
+namespace Cherry.Tests.Collections
 {
     [TestClass]
     public class PriorityQueueTest
@@ -25,7 +25,7 @@ namespace CherryCollections.Tests
         public void EnsureExceptionOnNullEnumerable()
         {
             Assert.ThrowsException<ArgumentNullException>(
-                () => new PriorityQueue<int>((IEnumerable<int>) null));
+                () => new PriorityQueue<int>((IEnumerable<int>)null));
         }
 
         [TestMethod]
@@ -35,7 +35,7 @@ namespace CherryCollections.Tests
             Assert.ThrowsException<ArgumentNullException>(
                 () => new PriorityQueue<int>(cmp));
             Assert.ThrowsException<ArgumentNullException>(
-                () => new PriorityQueue<int>(new int[] { 1, 2, 3}, cmp));
+                () => new PriorityQueue<int>(new int[] { 1, 2, 3 }, cmp));
         }
 
         [TestMethod]
@@ -45,7 +45,7 @@ namespace CherryCollections.Tests
             Assert.ThrowsException<ArgumentNullException>(
                 () => new PriorityQueue<int>(cmp));
             Assert.ThrowsException<ArgumentNullException>(
-                () => new PriorityQueue<int>(new int[] { 1, 2, 3}, cmp));
+                () => new PriorityQueue<int>(new int[] { 1, 2, 3 }, cmp));
         }
 
         [TestMethod]
@@ -65,7 +65,8 @@ namespace CherryCollections.Tests
             var pq = new PriorityQueue<int>(
                 new List<int> { 1, 8, 11, 21, 13, 4, -50 });
             var collected = new ConcurrentBag<int>();
-            Thread t = new(() => {
+            Thread t = new(() =>
+            {
                 lock (pq.SyncRoot)
                 {
                     foreach (var item in pq)
@@ -86,7 +87,7 @@ namespace CherryCollections.Tests
             });
             blocker.Start();
             t.Start();
-            Thread.Sleep(2000); 
+            Thread.Sleep(2000);
             /* By now, had synchronisation failed,
              * we should have executed a portion of the for loop. */
             Assert.AreEqual(0, collected.Count);
@@ -149,10 +150,10 @@ namespace CherryCollections.Tests
         public void TestItemRemoval()
         {
             var pq = new PriorityQueue<int>(
-                new[] { 10, 5, 9, 2, 3, 7, 8});
+                new[] { 10, 5, 9, 2, 3, 7, 8 });
 
             Assert.AreEqual(7, pq.Count);
-            
+
             Assert.IsTrue(pq.Remove(2));
             Assert.AreEqual(6, pq.Count);
 
@@ -346,7 +347,7 @@ namespace CherryCollections.Tests
             var arr2 = new int[pq.Count + 2];
             arr2[0] = -1;
             arr2[1] = -2;
-            pq.CopyTo((Array) arr2, 2);
+            pq.CopyTo((Array)arr2, 2);
             Assert.AreEqual(-1, arr2[0]);
             Assert.AreEqual(-2, arr2[1]);
             foreach (var item in items)
@@ -361,7 +362,7 @@ namespace CherryCollections.Tests
             var items = new int[] { 1903, 14, 104, 4234, 12, 191 };
             var pq = new PriorityQueue<int>(items);
             var array = new int[pq.Count - 3];
-            Assert.ThrowsException< ArgumentException>(
+            Assert.ThrowsException<ArgumentException>(
                 () => pq.CopyTo(array, 0));
         }
 
@@ -464,7 +465,8 @@ namespace CherryCollections.Tests
                 new List<int> { 1, 8, 11, 21, 13, 4, -50 });
             var clone = (PriorityQueue<int>)pq.Clone();
             var collected = new ConcurrentBag<int>();
-            Thread t = new(() => {
+            Thread t = new(() =>
+            {
                 lock (pq.SyncRoot)
                 {
                     foreach (var item in pq)
@@ -499,7 +501,7 @@ namespace CherryCollections.Tests
             {
                 Thread.Sleep(500);
             }
-        }        
+        }
 
         #region Helpers
 
@@ -532,12 +534,12 @@ namespace CherryCollections.Tests
                 Priority = priority;
             }
 
-            public override bool Equals(object obj) => 
+            public override bool Equals(object obj) =>
                 obj is MutableItem m && m.Name == Name;
 
             public override int GetHashCode() => Name.GetHashCode();
 
-            public override string ToString() => 
+            public override string ToString() =>
                 $"Name: { Name }, Priority { Priority }";
         }
 

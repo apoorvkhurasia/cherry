@@ -1,15 +1,15 @@
 using System;
 using System.Collections.Generic;
 
-using SE = CherryCollections.StandardExceptionMessages;
+using SE = Cherry.StandardExceptionMessages;
 
-namespace CherryCollections
+namespace Cherry.Collection
 {
     /// <summary>
     /// This class provides extensions to the <see cref="IList{T}"/>
     /// implementations.
     /// </summary>
-    public static class ListExtensions
+    public static class CollectionExtensions
     {
         /// <summary>
         /// Swaps items at index1 and index2 with each other.
@@ -55,6 +55,18 @@ namespace CherryCollections
             {
                 throw new IndexOutOfRangeException(SE.IndexLargerThanCount);
             }
+        }
+
+        /// <summary>
+        /// Returns a read-only view of this set. Changes made to this set
+        /// will be visible in the returned set.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="set"></param>
+        /// <returns>A read-only view of this set.</returns>
+        public static ReadOnlySortedSet<T> AsReadOnly<T>(this SortedSet<T> set)
+        {
+            return new ReadOnlySortedSet<T>(set);
         }
     }
 }

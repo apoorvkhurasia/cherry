@@ -3,9 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using SE = CherryCollections.StandardExceptionMessages;
+using SE = Cherry.StandardExceptionMessages;
 
-namespace CherryCollections
+namespace Cherry.Collection
 {
     /// <summary>
     /// A PriorityQueue&lt;T&gt; is a collection of items of type T. The

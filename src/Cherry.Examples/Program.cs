@@ -1,7 +1,8 @@
-﻿using System;
+﻿using Cherry.Collection;
+using System;
 using System.Collections.Generic;
 
-namespace CherryCollections.Examples
+namespace Cherry.Examples
 {
     class PriorityQueueExamples
     {

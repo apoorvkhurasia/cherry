@@ -1,8 +1,9 @@
 ﻿using BenchmarkDotNet.Attributes;
+using Cherry.Collection;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace CherryCollections.Benchmarks.PriorityQueue
+namespace Cherry.Benchmarks.PriorityQueue
 {
     public class CopyBenchmark : AbstractPriorityQueueBenchmark
     {

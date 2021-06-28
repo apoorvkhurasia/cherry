@@ -16,6 +16,12 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\CherryCollections\CherryCollections.csproj" />
+      <ProjectReference Include="..\Cherry\Cherry.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+      <None Remove="Collections\" />
+    </ItemGroup>
+    <ItemGroup>
+      <Folder Include="Collections\" />
     </ItemGroup>
 </Project>

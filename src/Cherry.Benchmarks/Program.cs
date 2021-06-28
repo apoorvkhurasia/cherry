@@ -1,10 +1,10 @@
-﻿using CherryCollections.Benchmarks.PriorityQueue;
+﻿using Cherry.Benchmarks.PriorityQueue;
 #if DEBUG
 using BenchmarkDotNet.Configs;
 #endif
 using BenchmarkDotNet.Running;
 
-namespace CherryCollections.Benchmarks
+namespace Cherry.Benchmarks
 {
     class Program
     {

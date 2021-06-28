@@ -3,18 +3,18 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31402.337
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CherryCollections", "CherryCollections\CherryCollections.csproj", "{49467F16-ACA6-4628-81E6-04BB4AD3EA3A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cherry", "Cherry\Cherry.csproj", "{49467F16-ACA6-4628-81E6-04BB4AD3EA3A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CherryCollections.Tests", "CherryCollections.Tests\CherryCollections.Tests.csproj", "{7F102F3B-E13A-4C8E-B306-242794F32060}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cherry.Tests", "Cherry.Tests\Cherry.Tests.csproj", "{7F102F3B-E13A-4C8E-B306-242794F32060}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{CCF70E1D-59F6-40B1-88B5-476E0F1C2430}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CherryCollections.Benchmarks", "CherryCollections.Benchmarks\CherryCollections.Benchmarks.csproj", "{613B0737-ED08-4A56-8139-3A308E5B98D4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cherry.Benchmarks", "Cherry.Benchmarks\Cherry.Benchmarks.csproj", "{613B0737-ED08-4A56-8139-3A308E5B98D4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CherryCollections.Examples", "CherryCollections.Examples\CherryCollections.Examples.csproj", "{074BEEB4-00C7-42B2-85DF-CC6FF25DF29E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cherry.Examples", "Cherry.Examples\Cherry.Examples.csproj", "{074BEEB4-00C7-42B2-85DF-CC6FF25DF29E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

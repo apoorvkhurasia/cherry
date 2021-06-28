@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using BenchmarkDotNet.Attributes;
 
-namespace CherryCollections.Benchmarks.PriorityQueue
+namespace Cherry.Benchmarks.PriorityQueue
 {
     [MarkdownExporter]
     public abstract class AbstractPriorityQueueBenchmark

@@ -10,14 +10,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="BenchmarkDotNet.Core" />
-    <None Remove="BenchmarkDotNet" />
-    <None Remove="PriorityQueue\" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet" Version="0.13.0" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\CherryCollections\CherryCollections.csproj" />
+    <ProjectReference Include="..\Cherry\Cherry.csproj" />
   </ItemGroup>
 </Project>
