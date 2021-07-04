@@ -4,16 +4,17 @@ using System.Diagnostics;
 
 namespace Cherry.Collections.Dense
 {
-    public class LowerEndpoint<T>
-        : IComparable<LowerEndpoint<T>>, IComparable<T> where T : IComparable<T>
+    public struct LowerEndpoint<T>
+        : IComparable<LowerEndpoint<T>>, IComparable<T>, IEndpoint<T> 
+        where T : IComparable<T>
     {
-        private readonly bool _infinite;
+        private readonly bool _isInf;
 
-        private LowerEndpoint(T? value, bool isInclusive, bool infinite)
+        private LowerEndpoint(T? value, bool isInclusive, bool isInf)
         {
             Value = value;
             IsInclusive = isInclusive;
-            _infinite = infinite;
+            _isInf = isInf;
         }
 
         public static LowerEndpoint<T> FiniteInclusive(T value) =>
@@ -22,32 +23,27 @@ namespace Cherry.Collections.Dense
         public static LowerEndpoint<T> FiniteExclusive(T value) =>
             new(value, false, false);
 
-        public static LowerEndpoint<T> InfiniteInstance { get; } =
+        public static LowerEndpoint<T> NegativeInfinity() =>
             new(default!, false, true);
 
         public T? Value { get; }
 
         public bool IsInclusive { get; }
 
-        public int CompareTo(LowerEndpoint<T>? other)
+        public bool IsFinite => !_isInf;
+
+        public int CompareTo(LowerEndpoint<T> other)
         {
-            if (other is null)
+            if(!this.IsFinite)
             {
-                return 1;
+                return other.IsFinite ? -1 : 0;
             }
-            else if (ReferenceEquals(this, other))
+            else if (!other.IsFinite)
             {
-                return 0;
-            }
-            else if (ReferenceEquals(this, InfiniteInstance))
-            {
-                return -1;
-            }
-            else if (ReferenceEquals(other, InfiniteInstance))
-            {
-                return 1;
+                return IsFinite ? 1 : 0;
             }
             Debug.Assert(Value is not null);
+            Debug.Assert(other.Value is not null);
             var cmp = Value.CompareTo(other.Value);
             if (cmp == 0)
             {
@@ -61,13 +57,28 @@ namespace Cherry.Collections.Dense
             }
         }
 
+        public int CompareTo(UpperEndpoint<T> other)
+        {
+            if (!this.IsFinite)
+            {
+                return -1;
+            }
+            else if (!other.IsFinite)
+            {
+                return 1;
+            }
+            Debug.Assert(Value is not null);
+            Debug.Assert(other.Value is not null);
+            return Value.CompareTo(other.Value) > 0 ? 1 : -1;
+        }
+
         public int CompareTo(T? other)
         {
             if (other is null)
             {
                 return 1;
             }
-            else if (ReferenceEquals(this, InfiniteInstance))
+            else if (this._isInf)
             {
                 return -1;
             }
@@ -87,23 +98,17 @@ namespace Cherry.Collections.Dense
         public bool IsValueOnTheEndPoint(T value) => CompareTo(value) == 0;
 
         public override bool Equals(object? obj) =>
-            obj is LowerEndpoint<T> endpoint &&
-            _infinite == endpoint._infinite &&
-            EqualityComparer<T?>.Default.Equals(Value, endpoint.Value) &&
-            IsInclusive == endpoint.IsInclusive;
+            obj is LowerEndpoint<T> other &&
+            _isInf == other._isInf &&
+            EqualityComparer<T?>.Default.Equals(Value, other.Value) &&
+            IsInclusive == other.IsInclusive;
 
         public override int GetHashCode() =>
-            HashCode.Combine(_infinite, Value, IsInclusive);
+            HashCode.Combine(Value, _isInf, IsInclusive);
 
         public static bool operator
             ==(LowerEndpoint<T> left, LowerEndpoint<T> right)
-        {
-            if (left is null)
-            {
-                return right is null;
-            }
-            return left.Equals(right);
-        }
+            => left.Equals(right);
 
         public static bool operator
             !=(LowerEndpoint<T> left, LowerEndpoint<T> right)
@@ -111,19 +116,35 @@ namespace Cherry.Collections.Dense
 
         public static bool operator
             <(LowerEndpoint<T> left, LowerEndpoint<T> right)
-            => left is null ? right is not null : left.CompareTo(right) < 0;
+            => left.CompareTo(right) < 0;
 
         public static bool operator
             <=(LowerEndpoint<T> left, LowerEndpoint<T> right)
-            => left is null || left.CompareTo(right) <= 0;
+            => left.CompareTo(right) <= 0;
 
         public static bool operator
             >(LowerEndpoint<T> left, LowerEndpoint<T> right)
-            => left is not null && left.CompareTo(right) > 0;
+            => left.CompareTo(right) > 0;
 
         public static bool operator
             >=(LowerEndpoint<T> left, LowerEndpoint<T> right)
-            => left is null ? right is null : left.CompareTo(right) >= 0;
+            => left.CompareTo(right) >= 0;
+
+        public static bool operator
+            <(LowerEndpoint<T> left, UpperEndpoint<T> right)
+            => left.CompareTo(right) < 0;
+
+        public static bool operator
+            <=(LowerEndpoint<T> left, UpperEndpoint<T> right)
+            => left.CompareTo(right) <= 0;
+
+        public static bool operator
+            >(LowerEndpoint<T> left, UpperEndpoint<T> right)
+            => left.CompareTo(right) > 0;
+
+        public static bool operator
+            >=(LowerEndpoint<T> left, UpperEndpoint<T> right)
+            => left.CompareTo(right) >= 0;
 
         public static bool operator <(LowerEndpoint<T> left, T right)
             => left.CompareTo(right) < 0;
@@ -149,15 +170,8 @@ namespace Cherry.Collections.Dense
         public static bool operator >=(T left, LowerEndpoint<T> right)
             => !(right < left);
 
-        public static bool operator
-            ==(LowerEndpoint<T> left, T right)
-        {
-            if (left is null)
-            {
-                return right is null;
-            }
-            return left.CompareTo(right) == 0;
-        }
+        public static bool operator ==(LowerEndpoint<T> left, T right)
+            => left.CompareTo(right) == 0;
 
         public static bool operator !=(LowerEndpoint<T> left, T right)
             => !(left == right);

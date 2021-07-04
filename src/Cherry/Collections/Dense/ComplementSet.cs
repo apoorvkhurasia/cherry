@@ -4,7 +4,7 @@ using System.Collections.Immutable;
 
 namespace  Cherry.Collections.Dense
 {
-    public class ComplementSet<T> : IDenseOrderedSet<T>
+    public class ComplementSet<T> : IDenseOrderedSet<T> where T : IComparable<T>
     {
         private readonly IDenseOrderedSet<T> _complementOf;
 
@@ -13,13 +13,11 @@ namespace  Cherry.Collections.Dense
             _complementOf = of;
         }
 
-        public IComparer<T> ValueComparer => _complementOf.ValueComparer;
-
         public bool IsEmpty => !_complementOf.IsEmpty;
 
-        public ImmutableList<Interval<T>> AsDisjointIntervals() =>
+        public ImmutableList<DenseInterval<T>> AsDisjointIntervals() =>
             new ComplementSet<T>(
-                new LazyUnion<T>(_complementOf.AsDisjointIntervals()))
+                new UnionSet<T>(_complementOf.AsDisjointIntervals()))
             .AsDisjointIntervals();
 
         public IDenseOrderedSet<T> Complement() => _complementOf;

@@ -1,49 +1,39 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 
-namespace Cherry.Math
+namespace Cherry.Collections.Dense
 {
-    internal class EmptyUncountableSet<T> : IUncountableSet<T>
+    internal class EmptySet<T> : IDenseOrderedSet<T> 
+        where T : IComparable<T>
     {
-        public EmptyUncountableSet() : this(Comparer<T>.Default) { }
+        private EmptySet() {  }
 
-        public EmptyUncountableSet(Comparison<T> cmp)
-            : this(Comparer<T>.Create(cmp)) { }
-
-        public EmptyUncountableSet(IComparer<T> valueComparer)
-        {
-            ValueComparer = valueComparer;
-        }
-
-        public IComparer<T> ValueComparer { get; }
+        public static EmptySet<T> Instance { get; } = new();
 
         public bool IsEmpty => true;
 
-        public ImmutableList<Interval<T>> AsDisjointIntervals() =>
-            ImmutableList<Interval<T>>.Empty;
+        public ImmutableList<DenseInterval<T>> AsDisjointIntervals() =>
+            ImmutableList<DenseInterval<T>>.Empty;
 
-        public IUncountableSet<T> Complement()
-        {
-            throw new System.NotImplementedException();
-        }
+        public IDenseOrderedSet<T> Complement() => new ComplementSet<T>(this);
 
         public bool Contains(T item) => false;
 
-        public IUncountableSet<T> Intersect(IUncountableSet<T> another) => this;
+        public IDenseOrderedSet<T> Intersect(IDenseOrderedSet<T> another) 
+            => this;
 
-        public bool IsProperSubsetOf(IUncountableSet<T> other) => true;
+        public bool IsProperSubsetOf(IDenseOrderedSet<T> other) => true;
 
-        public bool IsProperSupersetOf(IUncountableSet<T> other) => false;
+        public bool IsProperSupersetOf(IDenseOrderedSet<T> other) => false;
 
-        public bool IsSubsetOf(IUncountableSet<T> other) => true;
+        public bool IsSubsetOf(IDenseOrderedSet<T> other) => true;
 
-        public bool IsSupersetOf(IUncountableSet<T> other) => false;
+        public bool IsSupersetOf(IDenseOrderedSet<T> other) => false;
 
-        public bool Overlaps(IUncountableSet<T> other) => true;
+        public bool Overlaps(IDenseOrderedSet<T> other) => true;
 
-        public bool SetEquals(IUncountableSet<T> other) => other.IsEmpty;
+        public bool SetEquals(IDenseOrderedSet<T> other) => other.IsEmpty;
 
-        public IUncountableSet<T> Union(IUncountableSet<T> another) => another;
+        public IDenseOrderedSet<T> Union(IDenseOrderedSet<T> another) => another;
     }
 }

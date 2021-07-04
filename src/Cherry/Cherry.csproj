@@ -26,6 +26,12 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Compile Remove="Math\**" />
+      <EmbeddedResource Remove="Math\**" />
+      <None Remove="Math\**" />
+    </ItemGroup>
+
+    <ItemGroup>
       <None Remove="Collections\" />
       <None Remove="Math\" />
       <None Remove="Collections\Uncountable\" />
@@ -35,10 +41,5 @@
         <Pack>True</Pack>
         <PackagePath></PackagePath>
       </None>
-    </ItemGroup>
-    <ItemGroup>
-      <Folder Include="Collections\" />
-      <Folder Include="Math\" />
-      <Folder Include="Collections\Dense\" />
     </ItemGroup>
 </Project>

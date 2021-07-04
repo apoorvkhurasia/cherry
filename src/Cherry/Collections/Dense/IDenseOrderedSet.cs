@@ -129,6 +129,6 @@ namespace  Cherry.Collections.Dense
         /// be returned by the same instance on repeated calls.
         /// </summary>
         /// <returns></returns>
-		ImmutableList<Interval<T>> AsDisjointIntervals();
+		ImmutableList<DenseInterval<T>> AsDisjointIntervals();
 	}
 }

@@ -56,17 +56,5 @@ namespace Cherry.Collection
                 throw new IndexOutOfRangeException(SE.IndexLargerThanCount);
             }
         }
-
-        /// <summary>
-        /// Returns a read-only view of this set. Changes made to this set
-        /// will be visible in the returned set.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="set"></param>
-        /// <returns>A read-only view of this set.</returns>
-        public static ReadOnlySortedSet<T> AsReadOnly<T>(this SortedSet<T> set)
-        {
-            return new ReadOnlySortedSet<T>(set);
-        }
     }
 }
