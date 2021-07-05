@@ -78,6 +78,11 @@ namespace Cherry.Collections.Dense
             {
                 return 1;
             }
+            if (TypeConfiguration.IsPositiveInfinity(other))
+            {
+                //Because even if the bound is pos. inf. it will be exclusive
+                return -1;
+            }
             else if (!this.IsFinite)
             {
                 return 1;
@@ -105,6 +110,10 @@ namespace Cherry.Collections.Dense
 
         public override int GetHashCode() =>
             HashCode.Combine(Value, _isInf, IsInclusive);
+
+        public override string ToString() =>
+            (IsFinite ? Value!.ToString() : "∞") +
+            (IsInclusive ? "]" : ")");
 
         public static bool operator
             ==(UpperEndpoint<T> left, UpperEndpoint<T> right)

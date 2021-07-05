@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 
+using SE = Cherry.StandardExceptions;
+
 namespace Cherry.Collections.Dense
 {
     public struct LowerEndpoint<T>
         : IComparable<LowerEndpoint<T>>, IComparable<T>, IEndpoint<T> 
         where T : IComparable<T>
-    {
+    {        
         private readonly bool _isInf;
 
         private LowerEndpoint(T? value, bool isInclusive, bool isInf)
@@ -17,11 +19,28 @@ namespace Cherry.Collections.Dense
             _isInf = isInf;
         }
 
-        public static LowerEndpoint<T> FiniteInclusive(T value) =>
-            new(value, true, false);
+        public static LowerEndpoint<T> FiniteInclusive(T value)
+        {
+            if (TypeConfiguration.IsNegativeInfinity(value)
+                || TypeConfiguration.IsPositiveInfinity(value))
+            {
+                throw new ArgumentException(SE.INF_INCLUSIVE_BOUND);
+            }
+            return new(value, true, false);
+        }
 
-        public static LowerEndpoint<T> FiniteExclusive(T value) =>
-            new(value, false, false);
+        public static LowerEndpoint<T> FiniteExclusive(T value)
+        {
+            if (TypeConfiguration.IsNegativeInfinity(value))
+            {
+                return NegativeInfinity();
+            }
+            else if (TypeConfiguration.IsPositiveInfinity(value))
+            {
+                throw new ArgumentException(SE.POS_INF_LOWER_BOUND);
+            }
+            return new(value, false, false);
+        }
 
         public static LowerEndpoint<T> NegativeInfinity() =>
             new(default!, false, true);
@@ -78,16 +97,22 @@ namespace Cherry.Collections.Dense
             {
                 return 1;
             }
-            else if (this._isInf)
+            
+            if (TypeConfiguration.IsNegativeInfinity(other))
+            {
+                //Because even if the bound is neg inf. it will be exclusive
+                return 1; 
+            }
+            else if (!this.IsFinite)
             {
                 return -1;
             }
+
             Debug.Assert(Value is not null);
             var cmp = Value.CompareTo(other);
             if (cmp == 0)
             {
-                if (IsInclusive) return 0;
-                else return 1;
+                return IsInclusive ? 0 : 1;
             }
             else
             {
@@ -105,6 +130,10 @@ namespace Cherry.Collections.Dense
 
         public override int GetHashCode() =>
             HashCode.Combine(Value, _isInf, IsInclusive);
+
+        public override string ToString() =>
+            (IsInclusive ? "[" : "(") +
+            (IsFinite ? Value!.ToString() : "-∞");
 
         public static bool operator
             ==(LowerEndpoint<T> left, LowerEndpoint<T> right)
