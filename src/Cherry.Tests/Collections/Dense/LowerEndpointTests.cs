@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
 using LED = Cherry.Collections.Dense.LowerEndpoint<double>;
+using UED = Cherry.Collections.Dense.UpperEndpoint<double>;
 
 namespace Cherry.Tests.Collections.Dense
 {
@@ -36,6 +37,22 @@ namespace Cherry.Tests.Collections.Dense
 
             AssertOrderingLessThan(
                 LED.NegativeInfinity(), LED.FiniteExclusive(1));
+
+            AssertOrderingLessThan(
+                LED.NegativeInfinity(), LED.FiniteInclusive(1));
+
+            AssertOrderingLessThan(
+                LED.FiniteExclusive(10), LED.FiniteExclusive(11));
+
+            AssertOrderingLessThan(
+                LED.FiniteInclusive(10), LED.FiniteExclusive(10));
+        }
+
+        [TestMethod]
+        public void TestComparisionToUpperEndpoints()
+        {
+            AssertOrderingLessThan(
+                LED.NegativeInfinity(), UED.PositiveInfinity());
 
             AssertOrderingLessThan(
                 LED.NegativeInfinity(), LED.FiniteInclusive(1));
