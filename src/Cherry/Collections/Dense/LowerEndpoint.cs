@@ -49,17 +49,17 @@ namespace Cherry.Collections.Dense
 
         public bool IsInclusive { get; }
 
-        public bool IsFinite => !_isInf;
+        public bool IsInfinite => _isInf;
 
         public int CompareTo(LowerEndpoint<T> other)
         {
-            if(!this.IsFinite)
+            if(this.IsInfinite)
             {
-                return other.IsFinite ? -1 : 0;
+                return !other.IsInfinite ? -1 : 0;
             }
-            else if (!other.IsFinite)
+            else if (other.IsInfinite)
             {
-                return IsFinite ? 1 : 0;
+                return IsInfinite ? 0 : 1;
             }
             Debug.Assert(Value is not null);
             Debug.Assert(other.Value is not null);
@@ -78,11 +78,11 @@ namespace Cherry.Collections.Dense
 
         public int CompareTo(UpperEndpoint<T> other)
         {
-            if (!this.IsFinite)
+            if (this.IsInfinite)
             {
                 return -1;
             }
-            else if (!other.IsFinite)
+            else if (!other.IsInfinite)
             {
                 return 1;
             }
@@ -103,7 +103,7 @@ namespace Cherry.Collections.Dense
                 //Because even if the bound is neg inf. it will be exclusive
                 return 1; 
             }
-            else if (!this.IsFinite)
+            else if (this.IsInfinite)
             {
                 return -1;
             }
@@ -133,7 +133,7 @@ namespace Cherry.Collections.Dense
 
         public override string ToString() =>
             (IsInclusive ? "[" : "(") +
-            (IsFinite ? Value!.ToString() : "-∞");
+            (IsInfinite ? "-∞" : Value!.ToString());
 
         public static bool operator
             ==(LowerEndpoint<T> left, LowerEndpoint<T> right)

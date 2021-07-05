@@ -23,7 +23,7 @@ namespace Cherry.Tests.Collections.Dense
         public void TestValidEndpointCreation()
         {
             LED negInf = LED.FiniteExclusive(double.NegativeInfinity);
-            Assert.IsFalse(negInf.IsFinite);
+            Assert.IsTrue(negInf.IsInfinite);
             Assert.IsFalse(negInf.IsInclusive);
             Assert.AreEqual(LED.NegativeInfinity(), negInf);
             AssertOrderingEquals(LED.NegativeInfinity(), negInf);

@@ -60,8 +60,8 @@ namespace Cherry.Collections.Dense
         /// <see langword="true"></see> if and only if this set contains 0
         /// elements. <see langword="false"/> otherwise.
         /// </summary>
-        public bool IsEmpty => LowerEndpoint.IsFinite
-            && UpperEndpoint.IsFinite
+        public bool IsEmpty => !LowerEndpoint.IsInfinite
+            && !UpperEndpoint.IsInfinite
             && Comparer<T>.Default.Compare(
                 LowerEndpoint.Value, UpperEndpoint.Value) == 0;
 
@@ -241,7 +241,7 @@ namespace Cherry.Collections.Dense
             {
                 return EmptySet<T>.Instance;
             }
-            else if (!LowerEndpoint.IsFinite)
+            else if (LowerEndpoint.IsInfinite)
             {
                 Debug.Assert(UpperEndpoint.Value is not null);
                 var le = UpperEndpoint.IsInclusive ?
@@ -251,7 +251,7 @@ namespace Cherry.Collections.Dense
                 return new DenseInterval<T>(
                     le, UpperEndpoint<T>.PositiveInfinity());
             }
-            else if (!UpperEndpoint.IsFinite)
+            else if (UpperEndpoint.IsInfinite)
             {
                 Debug.Assert(LowerEndpoint.Value is not null);
                 var ue = LowerEndpoint.IsInclusive ?

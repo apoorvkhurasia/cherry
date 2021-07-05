@@ -30,17 +30,17 @@ namespace Cherry.Collections.Dense
 
         public bool IsInclusive { get; }
 
-        public bool IsFinite => !_isInf;
+        public bool IsInfinite => _isInf;
 
         public int CompareTo(UpperEndpoint<T> other)
         {
-            if (!other.IsFinite)
+            if (other.IsInfinite)
             {
-                return !this.IsFinite ? 0 : -1;
+                return this.IsInfinite ? 0 : -1;
             }
-            else if (!this.IsFinite)
+            else if (this.IsInfinite)
             {
-                return !other.IsFinite ? 0 : 1;
+                return other.IsInfinite ? 0 : 1;
             }
             Debug.Assert(Value is not null);
             Debug.Assert(other.Value is not null);
@@ -59,11 +59,11 @@ namespace Cherry.Collections.Dense
 
         public int CompareTo(LowerEndpoint<T> other)
         {
-            if (!this.IsFinite)
+            if (this.IsInfinite)
             {
                 return 1;
             }
-            else if (!other.IsFinite)
+            else if (other.IsInfinite)
             {
                 return -1;
             }
@@ -83,7 +83,7 @@ namespace Cherry.Collections.Dense
                 //Because even if the bound is pos. inf. it will be exclusive
                 return -1;
             }
-            else if (!this.IsFinite)
+            else if (this.IsInfinite)
             {
                 return 1;
             }
@@ -112,7 +112,7 @@ namespace Cherry.Collections.Dense
             HashCode.Combine(Value, _isInf, IsInclusive);
 
         public override string ToString() =>
-            (IsFinite ? Value!.ToString() : "∞") +
+            (IsInfinite ? "∞" : Value!.ToString()) +
             (IsInclusive ? "]" : ")");
 
         public static bool operator

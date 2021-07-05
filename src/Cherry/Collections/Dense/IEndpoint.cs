@@ -4,7 +4,7 @@ namespace Cherry.Collections.Dense
 {
     public interface IEndpoint<T> where T : IComparable<T>
     {
-        bool IsFinite { get; }
+        bool IsInfinite { get; }
 
         bool IsInclusive { get; }
 
