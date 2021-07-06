@@ -8,8 +8,6 @@ namespace Cherry.Collections.Dense
 
         bool IsInclusive { get; }
 
-        bool IsValueOnTheEndPoint(T value);
-
         T? Value { get; }
     }
 }

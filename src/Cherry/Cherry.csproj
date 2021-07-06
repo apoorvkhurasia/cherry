@@ -36,10 +36,18 @@
       <None Remove="Math\" />
       <None Remove="Collections\Uncountable\" />
     </ItemGroup>
+  
     <ItemGroup>
       <None Include="..\..\LICENSE">
         <Pack>True</Pack>
         <PackagePath></PackagePath>
       </None>
     </ItemGroup>
+
+    <ItemGroup>
+      <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+        <_Parameter1>Cherry.Tests</_Parameter1>
+      </AssemblyAttribute>
+    </ItemGroup>
+
 </Project>

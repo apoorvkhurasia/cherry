@@ -86,8 +86,9 @@ namespace Cherry.Tests.Collections
                 }
             });
             blocker.Start();
+            Thread.Sleep(500);
             t.Start();
-            Thread.Sleep(2000);
+            Thread.Sleep(5000);
             /* By now, had synchronisation failed,
              * we should have executed a portion of the for loop. */
             Assert.AreEqual(0, collected.Count);
@@ -486,7 +487,7 @@ namespace Cherry.Tests.Collections
                 }
             });
             blocker.Start();
-            Thread.Sleep(1000);
+            Thread.Sleep(500);
             t.Start();
             while (t.IsAlive)
             {

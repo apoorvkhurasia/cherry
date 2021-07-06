@@ -8,13 +8,11 @@ namespace Cherry.Collections.Dense
         : IComparable<UpperEndpoint<T>>, IComparable<T>, IEndpoint<T>
         where T : IComparable<T>
     {
-        private readonly bool _isInf;
-
         private UpperEndpoint(T? value, bool isInclusive, bool isInf)
         {
             Value = value;
             IsInclusive = isInclusive;
-            _isInf = isInf;
+            IsInfinite = isInf;
         }
 
         public static UpperEndpoint<T> FiniteInclusive(T value) =>
@@ -30,7 +28,7 @@ namespace Cherry.Collections.Dense
 
         public bool IsInclusive { get; }
 
-        public bool IsInfinite => _isInf;
+        public bool IsInfinite { get; }
 
         public int CompareTo(UpperEndpoint<T> other)
         {
@@ -59,17 +57,11 @@ namespace Cherry.Collections.Dense
 
         public int CompareTo(LowerEndpoint<T> other)
         {
-            if (this.IsInfinite)
+            if (this.IsInfinite || other.IsInfinite)
             {
                 return 1;
             }
-            else if (other.IsInfinite)
-            {
-                return -1;
-            }
-            Debug.Assert(Value is not null);
-            Debug.Assert(other.Value is not null);
-            return Value.CompareTo(other.Value) <= 0 ? 1 : -1;
+            return Value!.CompareTo(other.Value!) >= 0 ? 1 : -1;
         }
 
         public int CompareTo(T? other)
@@ -100,16 +92,14 @@ namespace Cherry.Collections.Dense
             }
         }
 
-        public bool IsValueOnTheEndPoint(T value) => CompareTo(value) == 0;
-
         public override bool Equals(object? obj) =>
             obj is UpperEndpoint<T> other &&
-            _isInf == other._isInf &&
+            IsInfinite == other.IsInfinite &&
             EqualityComparer<T?>.Default.Equals(Value, other.Value) &&
             IsInclusive == other.IsInclusive;
 
         public override int GetHashCode() =>
-            HashCode.Combine(Value, _isInf, IsInclusive);
+            HashCode.Combine(Value, IsInfinite, IsInclusive);
 
         public override string ToString() =>
             (IsInfinite ? "∞" : Value!.ToString()) +
