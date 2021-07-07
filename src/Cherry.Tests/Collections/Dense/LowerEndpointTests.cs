@@ -16,13 +16,13 @@ namespace Cherry.Tests.Collections.Dense
             Assert.ThrowsException<ArgumentException>(
                 () => LED.FiniteInclusive(double.NegativeInfinity));
             Assert.ThrowsException<ArgumentException>(
-                () => LED.FiniteExclusive(double.PositiveInfinity));
+                () => LED.Exclusive(double.PositiveInfinity));
         }
 
         [TestMethod]
         public void TestValidEndpointCreation()
         {
-            LED negInf = LED.FiniteExclusive(double.NegativeInfinity);
+            LED negInf = LED.Exclusive(double.NegativeInfinity);
             Assert.IsTrue(negInf.IsInfinite);
             Assert.IsFalse(negInf.IsInclusive);
             Assert.AreEqual(LED.NegativeInfinity(), negInf);
@@ -36,22 +36,22 @@ namespace Cherry.Tests.Collections.Dense
                 LED.NegativeInfinity(), LED.NegativeInfinity());
 
             AssertOrderingLessThan(
-                LED.NegativeInfinity(), LED.FiniteExclusive(1));
+                LED.NegativeInfinity(), LED.Exclusive(1));
 
             AssertOrderingLessThan(
                 LED.NegativeInfinity(), LED.FiniteInclusive(1));
 
             AssertOrderingLessThan(
-                LED.FiniteExclusive(10), LED.FiniteExclusive(11));
+                LED.Exclusive(10), LED.Exclusive(11));
 
             AssertOrderingLessThan(
-                LED.FiniteInclusive(10), LED.FiniteExclusive(10));
+                LED.FiniteInclusive(10), LED.Exclusive(10));
 
             AssertOrderingEquals(
                 LED.FiniteInclusive(10), LED.FiniteInclusive(10));
 
             AssertOrderingEquals(
-                LED.FiniteExclusive(10), LED.FiniteExclusive(10));
+                LED.Exclusive(10), LED.Exclusive(10));
         }
 
         [TestMethod]
@@ -64,7 +64,7 @@ namespace Cherry.Tests.Collections.Dense
                 LED.NegativeInfinity(), UED.FiniteInclusive(1));
 
             AssertOrderingLessThan(
-                LED.FiniteExclusive(10), UED.FiniteExclusive(10));
+                LED.Exclusive(10), UED.FiniteExclusive(10));
 
             AssertOrderingLessThan(
                 LED.FiniteInclusive(10), UED.FiniteInclusive(10));
@@ -76,7 +76,7 @@ namespace Cherry.Tests.Collections.Dense
                 UED.FiniteInclusive(11), LED.FiniteInclusive(12));
 
             AssertOrderingLessThan(
-                LED.FiniteInclusive(10), LED.FiniteExclusive(10));
+                LED.FiniteInclusive(10), LED.Exclusive(10));
         }
 
         [TestMethod]
@@ -89,8 +89,8 @@ namespace Cherry.Tests.Collections.Dense
                 double.NegativeInfinity, LED.NegativeInfinity());
 
             AssertOrderingLessThan(LED.NegativeInfinity(), 10);
-            AssertOrderingLessThan(1, LED.FiniteExclusive(1));
-            AssertOrderingLessThan(LED.FiniteExclusive(1), 2);
+            AssertOrderingLessThan(1, LED.Exclusive(1));
+            AssertOrderingLessThan(LED.Exclusive(1), 2);
             AssertOrderingEquals(LED.FiniteInclusive(1), 1);
         }
 

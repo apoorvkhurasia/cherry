@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 
 using SE = Cherry.StandardExceptions;
 
@@ -14,6 +13,7 @@ namespace Cherry.Collections.Dense
         : IComparable<LowerEndpoint<T>>, IComparable<T>, IEndpoint<T> 
         where T : IComparable<T>
     {
+
         private LowerEndpoint(T? value, bool isInclusive, bool isInf)
         {
             Value = value;
@@ -21,18 +21,53 @@ namespace Cherry.Collections.Dense
             IsInfinite = isInf;
         }
 
-        internal static LowerEndpoint<T> FiniteInclusive(T value)
+        /// <summary>
+        /// Creates an inclusive and neccessarily finite
+        /// <see cref="LowerEndpoint{T}"/> situated at the given value.
+        /// See <seealso cref="TypeConfiguration"/> for more details on
+        /// how to register instances representing positive or negative
+        /// infinity for <typeparamref name="T"/>.
+        /// </summary>
+        /// <param name="value">The point at which the endpoint is to be
+        /// created. Must not be null or infinite.</param>
+        /// <returns>An inclusive <see cref="LowerEndpoint{T}"/> situated at
+        /// the given value.</returns>
+        /// <exception cref="ArgumentNullException">Given value
+        /// cannot be null.</exception>
+        /// <exception cref="ArgumentException">Given value cannot be
+        /// infinite.</exception>
+        public static LowerEndpoint<T> FiniteInclusive(T value)
         {
             if (TypeConfiguration.IsNegativeInfinity(value)
                 || TypeConfiguration.IsPositiveInfinity(value))
             {
                 throw new ArgumentException(SE.INF_INCLUSIVE_BOUND);
             }
+            else if (value is null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
             return new(value, true, false);
         }
 
-        internal static LowerEndpoint<T> FiniteExclusive(T value)
+        /// <summary>
+        /// Creates an exclusive <see cref="LowerEndpoint{T}"/> situated at the 
+        /// given value.
+        /// </summary>
+        /// <param name="value">The point at which the endpoint is to be
+        /// created. Must not be null or positive infinity.</param>
+        /// <returns>An exclusive <see cref="LowerEndpoint{T}"/> situated at
+        /// the given value.</returns>
+        /// <exception cref="ArgumentNullException">Given value
+        /// cannot be null.</exception>
+        /// <exception cref="ArgumentException">Given value cannot be
+        /// positive infinity.</exception>
+        public static LowerEndpoint<T> Exclusive(T value)
         {
+            if (value is null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
             if (TypeConfiguration.IsNegativeInfinity(value))
             {
                 return NegativeInfinity();
@@ -44,13 +79,44 @@ namespace Cherry.Collections.Dense
             return new(value, false, false);
         }
 
-        public static LowerEndpoint<T> NegativeInfinity() =>
-            new(default!, false, true);
+        /// <summary>
+        /// Returns an instance representing an exclusive 
+        /// <see cref="LowerEndpoint{T}"/> sitauted at negative infinity.
+        /// </summary>
+        /// <returns>Returns the instance representing an exclusive 
+        /// <see cref="LowerEndpoint{T}"/> situated at negative infinity.
+        /// </returns>
+        public static LowerEndpoint<T> NegativeInfinity()
+        {
+            if (TypeConfiguration.TryGetNegativeInfinity(out T infty))
+            {
+                return new(infty, false, true);
+            }
+            else
+            {
+                return new(default!, false, true);
+            }
+        }
 
+        /// <summary>
+        /// The value of the endpoint. Can be null for an infinite 
+        /// endpoint if the type <typeparamref name="T"/> treats null
+        /// as negative infinity. See <seealso cref="TypeConfiguration"/>.
+        /// </summary>
         public T? Value { get; }
 
+        /// <summary>
+        /// Returns <see langword="true"/> if and only if this endpoint
+        /// includes the value at which it is located. <see langword="false">
+        /// otherwise.</see>
+        /// </summary>
         public bool IsInclusive { get; }
 
+        /// <summary>
+        /// Returns <see langword="true"/> if and only if this endpoint
+        /// is located at negative infinity. <see langword="false">
+        /// otherwise.</see>
+        /// </summary>
         public bool IsInfinite { get; }
 
         public int CompareTo(LowerEndpoint<T> other)

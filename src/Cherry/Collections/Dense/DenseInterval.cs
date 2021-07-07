@@ -245,7 +245,7 @@ namespace Cherry.Collections.Dense
             {
                 Debug.Assert(UpperEndpoint.Value is not null);
                 var le = UpperEndpoint.IsInclusive ?
-                    LowerEndpoint<T>.FiniteExclusive(UpperEndpoint.Value) :
+                    LowerEndpoint<T>.Exclusive(UpperEndpoint.Value) :
                     LowerEndpoint<T>.FiniteInclusive(UpperEndpoint.Value);
 
                 return new DenseInterval<T>(
@@ -266,7 +266,7 @@ namespace Cherry.Collections.Dense
                 Debug.Assert(UpperEndpoint.Value is not null);
                 Debug.Assert(LowerEndpoint.Value is not null);
                 var le = UpperEndpoint.IsInclusive ?
-                       LowerEndpoint<T>.FiniteExclusive(UpperEndpoint.Value) :
+                       LowerEndpoint<T>.Exclusive(UpperEndpoint.Value) :
                        LowerEndpoint<T>.FiniteInclusive(UpperEndpoint.Value);
                 var ue = LowerEndpoint.IsInclusive ?
                     UpperEndpoint<T>.FiniteExclusive(LowerEndpoint.Value) :
