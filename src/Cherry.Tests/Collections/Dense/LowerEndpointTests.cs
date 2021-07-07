@@ -1,7 +1,7 @@
 ﻿using Cherry.Collections.Dense;
+using Cherry.Math;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-
 using LED = Cherry.Collections.Dense.LowerEndpoint<double>;
 using UED = Cherry.Collections.Dense.UpperEndpoint<double>;
 
@@ -17,6 +17,16 @@ namespace Cherry.Tests.Collections.Dense
                 () => LED.FiniteInclusive(double.NegativeInfinity));
             Assert.ThrowsException<ArgumentException>(
                 () => LED.Exclusive(double.PositiveInfinity));
+        }
+
+        [TestMethod]
+        public void TestNullValueException()
+        {
+            Assert.ThrowsException<ArgumentNullException>(
+                () => LowerEndpoint<string>.FiniteInclusive(null!));
+
+            Assert.ThrowsException<ArgumentNullException>(
+                () => LowerEndpoint<string>.Exclusive(null!));
         }
 
         [TestMethod]
@@ -213,22 +223,6 @@ namespace Cherry.Tests.Collections.Dense
             Assert.IsFalse(smaller > bigger);
         }
 
-        private static void AssertOrderingEquals<T>(
-            LowerEndpoint<T> one, UpperEndpoint<T> two) where T : IComparable<T>
-        {
-            Assert.IsTrue(two <= one);
-            Assert.IsTrue(one <= two);
-
-            Assert.IsTrue(two >= one);
-            Assert.IsTrue(one >= two);
-
-            Assert.IsFalse(two < one);
-            Assert.IsFalse(one < two);
-
-            Assert.IsFalse(two > one);
-            Assert.IsFalse(one > two);
-        }
-
         private static void AssertOrderingLessThan<T>(
             LowerEndpoint<T> smaller, UpperEndpoint<T> bigger)
             where T : IComparable<T>
@@ -263,6 +257,6 @@ namespace Cherry.Tests.Collections.Dense
             Assert.IsFalse(smaller > bigger);
         }
 
-
+        
     }
 }

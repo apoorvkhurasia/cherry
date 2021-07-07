@@ -26,12 +26,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Compile Remove="Math\**" />
-      <EmbeddedResource Remove="Math\**" />
-      <None Remove="Math\**" />
-    </ItemGroup>
-
-    <ItemGroup>
       <None Remove="Collections\" />
       <None Remove="Math\" />
       <None Remove="Collections\Uncountable\" />

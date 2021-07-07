@@ -598,7 +598,7 @@ namespace Cherry.Collection
                 {
                     newCapacity = int.MaxValue;
                 }
-                newCapacity = Math.Max(newCapacity,
+                newCapacity = System.Math.Max(newCapacity,
                     _backingArray.Length + MIN_GROW_SIZE);
                 Array.Resize(ref _backingArray, newCapacity);
             }

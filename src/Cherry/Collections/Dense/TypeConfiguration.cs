@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Cherry.Math;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 
@@ -15,6 +16,8 @@ namespace Cherry.Collections.Dense
         {
             _positiveInfinities[typeof(double)] = double.PositiveInfinity;
             _negativeInfinities[typeof(double)] = double.NegativeInfinity;
+            _positiveInfinities[typeof(Rational)] = Rational.PositiveInfinity;
+            _negativeInfinities[typeof(Rational)] = Rational.NegativeInfinity;
         }
 
         public static void RegisterPositiveInfinityInstance<T>(T instance)
