@@ -2,7 +2,7 @@
 {
     public static class Arithmetic
     {
-        public static long GreatestCommonDivisor(long a, long b)
+        public static long GCD(long a, long b)
         {
             a = a < 0 ? -a : a;
             b = b < 0 ? -b : b;

@@ -1,6 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using TC = Cherry.Collections.Dense.TypeConfiguration;
+using TC = Cherry.TypeConfiguration;
 
 namespace Cherry.Tests.Collections.Dense
 {

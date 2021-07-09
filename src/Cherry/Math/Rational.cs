@@ -5,13 +5,17 @@ namespace Cherry.Math
     /// <summary>
     /// Represents a rational number.
     /// </summary>
-    public readonly struct Rational : IComparable<Rational>, IEquatable<Rational>,
-        IComparable<double>, IEquatable<double>,
-        IComparable<int>, IEquatable<int>,
-        IComparable<uint>, IEquatable<uint>,
-        IComparable<long>, IEquatable<long>,
-        IComparable<ulong>, IEquatable<ulong>
+    public readonly struct Rational : IComparable<Rational>, IEquatable<Rational>
+        //IComparable<double>, IEquatable<double>
     {
+
+        static Rational()
+        {
+            TypeConfiguration.RegisterNegativeInfinityInstance(
+                NegativeInfinity);
+            TypeConfiguration.RegisterNegativeInfinityInstance(
+                PositiveInfinity);
+        }
 
         public static Rational PositiveInfinity { get; } = new(1, 0);
 
@@ -23,15 +27,11 @@ namespace Cherry.Math
 
         private Rational(long numerator, long denominator)
         {
-            long gcd = Arithmetic.GreatestCommonDivisor(numerator, denominator);
-            unchecked
-            {
-                Numerator = numerator / gcd;
-                Denominator = denominator / gcd;
-            }
+            Numerator = numerator;
+            Denominator = denominator;
         }
 
-        public static Rational Create(long numerator, long denominator)
+        public static Rational Of(long numerator, long denominator)
         {
             if (numerator == 0 && denominator != 0)
             {
@@ -39,8 +39,7 @@ namespace Cherry.Math
             }
             else if (denominator != 0)
             {
-                long gcd = Arithmetic.GreatestCommonDivisor(
-                    numerator, denominator);
+                long gcd = Arithmetic.GCD(numerator, denominator);
                 unchecked
                 {
                     //Standardise the sign to numerator
@@ -105,15 +104,13 @@ namespace Cherry.Math
                 return NaN;
             }
 
-            var denominator = Arithmetic.GreatestCommonDivisor(
-                Denominator, other.Denominator);
-            long numerator;
-            unchecked
-            {
-                numerator = Numerator * (denominator / Denominator)
-                    + other.Numerator * (denominator / other.Denominator);
-            }
-            return Create(numerator, denominator);
+            /* This is our best shot at preventing an overflow but it can
+             * still happen. */
+            var gcd = Arithmetic.GCD(Denominator, other.Denominator);
+            var den = (other.Denominator / gcd) * Denominator;
+            var num = Numerator * (den / Denominator) + 
+                other.Numerator * (den / other.Denominator);
+            return Of(num, den);
         }
 
         public Rational Multiply(Rational by)
@@ -133,15 +130,13 @@ namespace Cherry.Math
                 return NaN;
             }
 
-            var gcd1 = Arithmetic.GreatestCommonDivisor(
-                Numerator, by.Denominator);
-            var gcd2 = Arithmetic.GreatestCommonDivisor(
-                by.Numerator, Denominator);
+            var gcd1 = Arithmetic.GCD(Numerator, by.Denominator);
+            var gcd2 = Arithmetic.GCD(by.Numerator, Denominator);
             return new((Numerator / gcd1) * (by.Numerator / gcd2),
                 (Denominator / gcd1) * (by.Denominator / gcd2));
         }
 
-        public Rational Inverse() => Create(Denominator, Numerator);
+        public Rational Inverse() => Of(Denominator, Numerator);
 
         public Rational Divide(Rational by) => Multiply(by.Inverse());
 
@@ -166,33 +161,33 @@ namespace Cherry.Math
 
         public int CompareTo(Rational other)
         {
-            if (this.IsNaN)
+            if (other.Numerator == Numerator &&
+                other.Denominator == Denominator)
             {
-                return other.IsNaN ? 0 : 1;
-            }
-            else if (other.IsNaN)
-            {
-                return -1;
+                return 0;
             }
             else if (this.IsPositiveInfinity)
             {
-                return other.IsPositiveInfinity ? 0 : 1;
+                return 1;
             }
             else if (this.IsNegativeInfinity)
             {
-                return other.IsNegativeInfinity ? 0 : -1;
+                return -1;
             }
             else
             {
-                return CompareTo((double) other.Numerator/ other.Denominator);
+                return ((double)this).CompareTo(other);
             }
         }
 
-        public bool Equals(Rational other) =>
-            other.Numerator == Numerator && other.Denominator == Denominator;
+        public bool Equals(Rational other) => CompareTo(other) == 0;
 
         public static bool operator ==(Rational left, Rational right)
         {
+            if (left.IsNaN || right.IsNaN)
+            {
+                return false;
+            }
             return left.Equals(right);
         }
 
@@ -203,103 +198,119 @@ namespace Cherry.Math
 
         public static bool operator <(Rational left, Rational right)
         {
+            if (left.IsNaN || right.IsNaN)
+            {
+                return false;
+            }
             return left.CompareTo(right) < 0;
         }
 
         public static bool operator <=(Rational left, Rational right)
         {
+            if (left.IsNaN || right.IsNaN)
+            {
+                return false;
+            }
             return left.CompareTo(right) <= 0;
         }
 
         public static bool operator >(Rational left, Rational right)
         {
+            if (left.IsNaN || right.IsNaN)
+            {
+                return false;
+            }
             return left.CompareTo(right) > 0;
         }
 
         public static bool operator >=(Rational left, Rational right)
         {
+            if (left.IsNaN || right.IsNaN)
+            {
+                return false;
+            }
             return left.CompareTo(right) >= 0;
         }
 
         #endregion
 
-        #region Comparision to doubles
+        //#region Comparision to doubles
 
-        public int CompareTo(double other)
-        {
-            if (this.IsPositiveInfinity)
-            {
-                return other == double.PositiveInfinity ? 0 : 1;
-            }
-            else if (this.IsNegativeInfinity)
-            {
-                return other == double.NegativeInfinity ? 0 : -1;
-            }
-            else
-            {
-                return ((double)this).CompareTo(other);
-            }
-        }
+        //public int CompareTo(double other)
+        //{
+        //    if (this.IsPositiveInfinity)
+        //    {
+        //        return other == double.PositiveInfinity ? 0 : 1;
+        //    }
+        //    else if (this.IsNegativeInfinity)
+        //    {
+        //        return other == double.NegativeInfinity ? 0 : -1;
+        //    }
+        //    else
+        //    {
+        //        return ((double)this).CompareTo(other);
+        //    }
+        //}
 
-        public bool Equals(double other) => ((double)this).Equals(other);
+        //public bool Equals(double other) => ((double)this).Equals(other);
 
-        #endregion
+        //#endregion
 
-        #region Comparision to ints
+        //#region Comparision to ints
 
-        public int CompareTo(int other)
-        {
-            if (this.IsNaN)
-            {
-                return 1;
-            }
-            else if (this.IsPositiveInfinity)
-            {
-                return 1;
-            }
-            else if (this.IsNegativeInfinity)
-            {
-                return -1;
-            }
-            else
-            {
-                return ((double) Numerator/Denominator).CompareTo(other);
-            }
-        }
+        //public int CompareTo(int other)
+        //{
+        //    if (this.IsNaN)
+        //    {
+        //        return 1;
+        //    }
+        //    else if (this.IsPositiveInfinity)
+        //    {
+        //        return 1;
+        //    }
+        //    else if (this.IsNegativeInfinity)
+        //    {
+        //        return -1;
+        //    }
+        //    else
+        //    {
+        //        return ((double) Numerator/Denominator).CompareTo(other);
+        //    }
+        //}
 
-        public bool Equals(int other) => Denominator == 1 && Numerator == other;
+        //public bool Equals(int other) => Denominator == 1 && Numerator == other;
 
-        #endregion
+        //#endregion
 
-        #region Comparision to uints
+        //#region Comparision to uints
 
-        public int CompareTo(uint other) =>
-            ((double)Numerator / Denominator).CompareTo(other);
+        //public int CompareTo(uint other) =>
+        //    ((double)Numerator / Denominator).CompareTo(other);
 
-        public bool Equals(uint other) =>
-            ((double)Numerator / Denominator).Equals(other);
+        //public bool Equals(uint other) =>
+        //    ((double)Numerator / Denominator).Equals(other);
 
-        #endregion
+        //#endregion
 
-        #region Comparision to longs
+        //#region Comparision to longs
 
-        public int CompareTo(long other) =>
-            ((double)Numerator / Denominator).CompareTo(other);
+        //public int CompareTo(long other) =>
+        //    ((double)Numerator / Denominator).CompareTo(other);
 
-        public bool Equals(long other) => 
-            Denominator == 1 && Numerator == other;
+        //public bool Equals(long other) => 
+        //    Denominator == 1 && Numerator == other;
 
-        #endregion
+        //#endregion
 
-        #region Comparision to ulongs
+        //#region Comparision to ulongs
 
-        public int CompareTo(ulong other) =>
-            ((double)Numerator / Denominator).CompareTo(other);
+        //public int CompareTo(ulong other) =>
+        //    ((double)Numerator / Denominator).CompareTo(other);
 
-        public bool Equals(ulong other) => 
-            ((double)Numerator / Denominator).Equals(other);
+        //public bool Equals(ulong other) => 
+        //    ((double)Numerator / Denominator).Equals(other);
 
-        #endregion
+        //#endregion
 
         #region Conversions
 
