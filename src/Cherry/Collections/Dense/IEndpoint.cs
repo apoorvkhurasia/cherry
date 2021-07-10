@@ -2,7 +2,7 @@
 
 namespace Cherry.Collections.Dense
 {
-    public interface IEndpoint<T> where T : IComparable<T>
+    public interface IEndpoint<T> : IComparable<T> where T : IComparable<T>
     {
         bool IsInfinite { get; }
 

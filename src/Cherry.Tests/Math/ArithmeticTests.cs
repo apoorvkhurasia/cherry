@@ -27,5 +27,14 @@ namespace Cherry.Tests.Math
                     $"Test failed for {num}, {prime}");
             }
         }
+
+        [TestMethod]
+        public void TestSign()
+        {
+            var random = new Random().Next();
+            Assert.AreEqual(0, 0.Sign());
+            Assert.AreEqual(-1, -random.Sign());
+            Assert.AreEqual(1, random.Sign());
+        }
     }
 }

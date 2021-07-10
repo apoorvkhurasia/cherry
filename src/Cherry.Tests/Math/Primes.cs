@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Cherry.Tests.Math
 {
+    /// <summary>
+    /// A helper class to get some prime numbers for testing purposes.
+    /// </summary>
     public static class Primes
     {
         private static readonly ushort[] _primes =
@@ -42,9 +43,17 @@ namespace Cherry.Tests.Math
 
         private static readonly Random random = new();
 
+        /// <summary>
+        /// Returns a random prime between 2 and 2281.
+        /// </summary>
+        /// <returns></returns>
         public static ushort NextRandom() => 
             _primes[random.Next(0, _primes.Length - 1)];
 
+        /// <summary>
+        /// Returns primes from 2 to 2281 as a sequence.
+        /// </summary>
+        /// <returns></returns>
         public static IEnumerable<ushort> Sequence() => _primes.AsEnumerable();
     }
 }

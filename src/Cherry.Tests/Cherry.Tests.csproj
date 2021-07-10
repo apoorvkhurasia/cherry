@@ -22,8 +22,4 @@
       <None Remove="Collections\" />
       <None Remove="Collections\Dense\" />
     </ItemGroup>
-    <ItemGroup>
-      <Folder Include="Collections\" />
-      <Folder Include="Collections\Dense\" />
-    </ItemGroup>
 </Project>

@@ -9,8 +9,9 @@ namespace Cherry.Collections.Dense
     /// Represents a lower endpoint of a <see cref="DenseInterval{T}"/>.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public struct LowerEndpoint<T>
-        : IComparable<LowerEndpoint<T>>, IComparable<T>, IEndpoint<T> 
+    public readonly struct LowerEndpoint<T>
+        : IComparable<LowerEndpoint<T>>, 
+          IComparable<UpperEndpoint<T>>, IEndpoint<T> 
         where T : IComparable<T>
     {
 
@@ -149,7 +150,12 @@ namespace Cherry.Collections.Dense
             {
                 return -1;
             }
-            return Value!.CompareTo(other.Value!) > 0 ? 1 : -1;
+            var cmp = Value!.CompareTo(other.Value!);
+            if (cmp != 0)
+            {
+                return cmp;
+            }
+            return this.IsInclusive && other.IsInclusive ? 0 : 1;
         }
 
         public int CompareTo(T? other)
@@ -224,7 +230,7 @@ namespace Cherry.Collections.Dense
 
         #endregion
 
-        #region Comparision operators LE and UE
+        #region Comparision operators LE to UE
 
         public static bool operator
             <(LowerEndpoint<T> left, UpperEndpoint<T> right)
@@ -241,6 +247,14 @@ namespace Cherry.Collections.Dense
         public static bool operator
             >=(LowerEndpoint<T> left, UpperEndpoint<T> right)
             => left.CompareTo(right) >= 0;
+
+        public static bool operator
+            ==(LowerEndpoint<T> left, UpperEndpoint<T> right)
+            => left.CompareTo(right) == 0;
+
+        public static bool operator
+            !=(LowerEndpoint<T> left, UpperEndpoint<T> right)
+            => !(left == right);
 
         #endregion
 

@@ -29,6 +29,8 @@ namespace Cherry.Tests.Collections.Dense
 
             Assert.IsFalse(TC.IsPositiveInfinity(1));
             Assert.IsFalse(TC.IsNegativeInfinity(-1));
+            TC.RegisterNegativeInfinityInstance(double.NegativeInfinity);
+            TC.RegisterPositiveInfinityInstance(double.PositiveInfinity);
         }
 
         [TestMethod]
