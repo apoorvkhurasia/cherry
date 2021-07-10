@@ -1,5 +1,5 @@
 ﻿using BenchmarkDotNet.Attributes;
-using Cherry.Collection;
+using Cherry.Collections;
 using System.Collections.Generic;
 using System.Linq;
 

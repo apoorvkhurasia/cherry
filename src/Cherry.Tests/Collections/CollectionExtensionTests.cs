@@ -1,4 +1,4 @@
-﻿using Cherry.Collection;
+﻿using Cherry.Collections;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace Cherry.Tests.Collections
 {
     [TestClass]
-    public class ListExtensionTests
+    public class CollectionExtensionTests
     {
         [TestMethod]
         public void TestSwap()

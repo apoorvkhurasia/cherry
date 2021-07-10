@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using Cherry.Collection;
+using Cherry.Collections;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Cherry.Tests.Collections

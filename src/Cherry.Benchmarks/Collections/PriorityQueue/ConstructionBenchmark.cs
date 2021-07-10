@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 
 using BenchmarkDotNet.Attributes;
-using Cherry.Collection;
+using Cherry.Collections;
 
 namespace Cherry.Benchmarks.PriorityQueue
 {

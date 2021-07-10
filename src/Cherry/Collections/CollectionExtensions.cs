@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using SE = Cherry.StandardExceptions;
 
-namespace Cherry.Collection
+namespace Cherry.Collections
 {
     /// <summary>
     /// This class provides extensions to the <see cref="IList{T}"/>

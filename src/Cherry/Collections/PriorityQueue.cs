@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using SE = Cherry.StandardExceptions;
 
-namespace Cherry.Collection
+namespace Cherry.Collections
 {
     /// <summary>
     /// A PriorityQueue&lt;T&gt; is a collection of items of type T. The

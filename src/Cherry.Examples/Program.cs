@@ -1,4 +1,4 @@
-﻿using Cherry.Collection;
+﻿using Cherry.Collections;
 using System;
 using System.Collections.Generic;
 

@@ -2,7 +2,7 @@
 using System.Linq;
 
 using BenchmarkDotNet.Attributes;
-using Cherry.Collection;
+using Cherry.Collections;
 
 namespace Cherry.Benchmarks.PriorityQueue
 {
