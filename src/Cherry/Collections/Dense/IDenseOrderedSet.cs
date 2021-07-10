@@ -33,11 +33,11 @@ namespace  Cherry.Collections.Dense
 		/// </summary>
 		bool IsEmpty { get; }
 
-		/// <summary>Determines if the set contains a specific item</summary>
-		/// <param name="item">The item to check if the set contains.</param>
-		/// <returns><see langword="true" /> if found;
-		/// otherwise <see langword="false" />.</returns>
-		bool Contains(T item);
+        /// <summary>Determines if the set contains a specific item</summary>
+        /// <param name="item">The item to check if the set contains.</param>
+        /// <returns><see langword="true" /> if found;
+        /// otherwise <see langword="false" />.</returns>
+        bool Contains(T item);
 
 		/// <summary>Determines whether the current set is a proper (strict)
 		/// subset of a specified set.</summary>

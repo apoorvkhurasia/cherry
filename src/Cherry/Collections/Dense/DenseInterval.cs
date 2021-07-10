@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Linq;
 
 using SE = Cherry.StandardExceptions;
@@ -57,13 +56,21 @@ namespace Cherry.Collections.Dense
         public UpperEndpoint<T> UpperEndpoint { get; }
 
         /// <summary>
-        /// <see langword="true"></see> if and only if this set contains 0
+        /// <see langword="true"></see> if and only if this set contains no
         /// elements. <see langword="false"/> otherwise.
         /// </summary>
         public bool IsEmpty => !LowerEndpoint.IsInfinite
             && !UpperEndpoint.IsInfinite
             && Comparer<T>.Default.Compare(
                 LowerEndpoint.Value, UpperEndpoint.Value) == 0;
+
+        /// <summary>
+        /// <see langword="true"></see> if and only if this set contains every
+        /// element of type <typeparamref name="T"/>. 
+        /// <see langword="false"/> otherwise.
+        /// </summary>
+        public bool IsUniverse => 
+            LowerEndpoint.IsInfinite && UpperEndpoint.IsInfinite;
 
         /// <summary>
         /// An element is contained in this interval if and only if it is
@@ -237,40 +244,36 @@ namespace Cherry.Collections.Dense
 
         public IDenseOrderedSet<T> Complement()
         {
-            if (ReferenceEquals(this, UniverseInstance))
+            if (this.IsUniverse)
             {
                 return EmptySet<T>.Instance;
             }
             else if (LowerEndpoint.IsInfinite)
             {
-                Debug.Assert(UpperEndpoint.Value is not null);
                 var le = UpperEndpoint.IsInclusive ?
-                    LowerEndpoint<T>.Exclusive(UpperEndpoint.Value) :
-                    LowerEndpoint<T>.FiniteInclusive(UpperEndpoint.Value);
+                    LowerEndpoint<T>.Exclusive(UpperEndpoint.Value!) :
+                    LowerEndpoint<T>.FiniteInclusive(UpperEndpoint.Value!);
 
                 return new DenseInterval<T>(
                     le, UpperEndpoint<T>.PositiveInfinity());
             }
             else if (UpperEndpoint.IsInfinite)
             {
-                Debug.Assert(LowerEndpoint.Value is not null);
                 var ue = LowerEndpoint.IsInclusive ?
-                    UpperEndpoint<T>.Exclusive(LowerEndpoint.Value) :
-                    UpperEndpoint<T>.FiniteInclusive(LowerEndpoint.Value);
+                    UpperEndpoint<T>.Exclusive(LowerEndpoint.Value!) :
+                    UpperEndpoint<T>.FiniteInclusive(LowerEndpoint.Value!);
 
                 return new DenseInterval<T>(
                     LowerEndpoint<T>.NegativeInfinity(), ue);
             }
             else
             {
-                Debug.Assert(UpperEndpoint.Value is not null);
-                Debug.Assert(LowerEndpoint.Value is not null);
                 var le = UpperEndpoint.IsInclusive ?
-                       LowerEndpoint<T>.Exclusive(UpperEndpoint.Value) :
-                       LowerEndpoint<T>.FiniteInclusive(UpperEndpoint.Value);
+                       LowerEndpoint<T>.Exclusive(UpperEndpoint.Value!) :
+                       LowerEndpoint<T>.FiniteInclusive(UpperEndpoint.Value!);
                 var ue = LowerEndpoint.IsInclusive ?
-                    UpperEndpoint<T>.Exclusive(LowerEndpoint.Value) :
-                    UpperEndpoint<T>.FiniteInclusive(LowerEndpoint.Value);
+                    UpperEndpoint<T>.Exclusive(LowerEndpoint.Value!) :
+                    UpperEndpoint<T>.FiniteInclusive(LowerEndpoint.Value!);
                 return new UnionSet<T>(new[]
                 {
                     new DenseInterval<T>(
