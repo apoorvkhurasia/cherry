@@ -37,7 +37,7 @@ namespace Cherry.Collections.Dense
         /// cannot be null.</exception>
         /// <exception cref="ArgumentException">Given value cannot be
         /// infinite.</exception>
-        public static LowerEndpoint<T> FiniteInclusive(T value)
+        public static LowerEndpoint<T> Inclusive(T value)
         {
             if (TypeConfiguration.IsNegativeInfinity(value)
                 || TypeConfiguration.IsPositiveInfinity(value))

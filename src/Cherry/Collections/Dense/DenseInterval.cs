@@ -62,7 +62,7 @@ namespace Cherry.Collections.Dense
         public bool IsEmpty => !LowerEndpoint.IsInfinite
             && !UpperEndpoint.IsInfinite
             && Comparer<T>.Default.Compare(
-                LowerEndpoint.Value, UpperEndpoint.Value) == 0;
+                LowerEndpoint.Value, UpperEndpoint.Value) >= 0;
 
         /// <summary>
         /// <see langword="true"></see> if and only if this set contains every
@@ -252,7 +252,7 @@ namespace Cherry.Collections.Dense
             {
                 var le = UpperEndpoint.IsInclusive ?
                     LowerEndpoint<T>.Exclusive(UpperEndpoint.Value!) :
-                    LowerEndpoint<T>.FiniteInclusive(UpperEndpoint.Value!);
+                    LowerEndpoint<T>.Inclusive(UpperEndpoint.Value!);
 
                 return new DenseInterval<T>(
                     le, UpperEndpoint<T>.PositiveInfinity());
@@ -261,7 +261,7 @@ namespace Cherry.Collections.Dense
             {
                 var ue = LowerEndpoint.IsInclusive ?
                     UpperEndpoint<T>.Exclusive(LowerEndpoint.Value!) :
-                    UpperEndpoint<T>.FiniteInclusive(LowerEndpoint.Value!);
+                    UpperEndpoint<T>.Inclusive(LowerEndpoint.Value!);
 
                 return new DenseInterval<T>(
                     LowerEndpoint<T>.NegativeInfinity(), ue);
@@ -270,10 +270,10 @@ namespace Cherry.Collections.Dense
             {
                 var le = UpperEndpoint.IsInclusive ?
                        LowerEndpoint<T>.Exclusive(UpperEndpoint.Value!) :
-                       LowerEndpoint<T>.FiniteInclusive(UpperEndpoint.Value!);
+                       LowerEndpoint<T>.Inclusive(UpperEndpoint.Value!);
                 var ue = LowerEndpoint.IsInclusive ?
                     UpperEndpoint<T>.Exclusive(LowerEndpoint.Value!) :
-                    UpperEndpoint<T>.FiniteInclusive(LowerEndpoint.Value!);
+                    UpperEndpoint<T>.Inclusive(LowerEndpoint.Value!);
                 return new UnionSet<T>(new[]
                 {
                     new DenseInterval<T>(

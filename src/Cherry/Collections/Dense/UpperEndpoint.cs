@@ -36,7 +36,7 @@ namespace Cherry.Collections.Dense
         /// cannot be null.</exception>
         /// <exception cref="ArgumentException">Given value cannot be
         /// infinite.</exception>
-        public static UpperEndpoint<T> FiniteInclusive(T value)
+        public static UpperEndpoint<T> Inclusive(T value)
         {
             if (TypeConfiguration.IsNegativeInfinity(value)
                 || TypeConfiguration.IsPositiveInfinity(value))
@@ -161,8 +161,8 @@ namespace Cherry.Collections.Dense
             {
                 return 1;
             }
-            Debug.Assert(Value is not null);
-            var cmp = Value.CompareTo(other);
+            
+            var cmp = Value!.CompareTo(other);
             if (cmp == 0)
             {
                 if (IsInclusive) return 0;
