@@ -108,10 +108,26 @@ namespace  Cherry.Collections.Dense
 		/// Returns another set which contains elements of this set and the
 		/// given set.
 		/// </summary>
-		/// <param name="another">Another set.</param>
+		/// <param name="other">Another set.</param>
 		/// <returns>A set which contains elements of this set and the
 		/// given set.</returns>
-		IDenseOrderedSet<T> Union(IDenseOrderedSet<T> another);
+		IDenseOrderedSet<T> Union(IDenseOrderedSet<T> other)
+        {
+			StandardExceptions.RequireNonNull(other, nameof(other));
+			var unionIntervals = SetMath.Union(new[] { this, other });
+			if (unionIntervals.Count == 0)
+			{
+				return EmptySet<T>.Instance;
+			}
+			else if (unionIntervals.Count == 1)
+			{
+				return unionIntervals[1];
+			}
+			else
+            {
+				return new UnionSet<T>(unionIntervals);
+            }
+		}
 
 		// <summary>
 		/// Returns another set which contains elements belonging to

@@ -5,6 +5,7 @@ using DI = Cherry.Collections.Dense.DenseInterval<double>;
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using Cherry.Collections.Dense;
 
 namespace Cherry.Tests.Collections.Dense
 {
@@ -74,12 +75,35 @@ namespace Cherry.Tests.Collections.Dense
         [TestMethod]
         public void TestUnion()
         {
+            var interval1 = new DI(LED.Inclusive(1), UED.Inclusive(2));
+            var interval2 = new DI(LED.Inclusive(3), UED.Inclusive(4));
+            var union = interval1.Union(interval2);
+            RunContainsTests(union,
+                new double[] { 1, 1.5, 2 - EPSILON, 2, 3, 3.5, 4 - EPSILON, 4 },
+                new double[] { 1 - EPSILON, 2 + EPSILON,
+                               3 - EPSILON, 4 + EPSILON});
 
+            //Reflexivity
+            union = interval2.Union(interval1);
+            RunContainsTests(union,
+                new double[] { 1, 1.5, 2 - EPSILON, 2, 3, 3.5, 4 - EPSILON, 4 },
+                new double[] { 1 - EPSILON, 2 + EPSILON,
+                               3 - EPSILON, 4 + EPSILON});
+
+            var interval3 = new DI(LED.Exclusive(2), UED.Exclusive(3));
+            var union2 = interval1.Union(interval3);
+            RunContainsTests(union2,
+                new double[] { 1, 1.5, 2 - EPSILON, 2, 2.5, 3 - EPSILON},
+                new double[] { -2, 1 - EPSILON, 3 + EPSILON, 4});
+
+            var interval4 = interval1.Union(interval2).Union(interval3);
+            var equivalent = new DI(LED.Inclusive(1), UED.Inclusive(4));
+            Assert.IsTrue(interval4.SetEquals(equivalent));
         }
 
-        private void RunContainsTests(DI interval, 
-            IEnumerable<double> containedPoints, 
-            IEnumerable<double> notContainedPoints)
+        private void RunContainsTests<T>(IDenseOrderedSet<T> interval, 
+            IEnumerable<T> containedPoints, 
+            IEnumerable<T> notContainedPoints) where T : IComparable<T>
         {
             foreach(var point in containedPoints)
             {

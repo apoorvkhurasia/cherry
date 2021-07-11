@@ -97,49 +97,6 @@ namespace Cherry.Collections.Dense
         }
 
         /// <summary>
-        /// This method creates a new set which contains every element
-        /// contained in this set and also contains every element in the given
-        /// set.
-        /// </summary>
-        /// <param name="other">The other set.</param>
-        /// <returns>The union set which contains all elements of this
-        /// set as well as that of the other given set.</returns>
-        /// <exception cref="ArgumentNullException">The given set cannot be
-        /// null.</exception>
-        public IDenseOrderedSet<T> Union(IDenseOrderedSet<T> other)
-        {
-            SE.RequireNonNull(other, nameof(other));
-
-            var orderedDisjointSets = other.AsDisjointIntervals()
-                .Union(this.AsDisjointIntervals())
-                .Where(s => !s.IsEmpty)
-                .OrderBy(i => i.LowerEndpoint)
-                .ThenBy(i => i.UpperEndpoint)
-                .ToList();
-            if (orderedDisjointSets.Count == 0)
-            {
-                return EmptySet<T>.Instance;
-            }
-            else
-            {
-                for (int i = 1; i < orderedDisjointSets.Count; i++)
-                {
-                    var preceding = orderedDisjointSets[i - 1];
-                    var curr = orderedDisjointSets[i];
-                    if (curr.IsConnected(preceding))
-                    {
-                        orderedDisjointSets[i - 1] = null!;
-                        orderedDisjointSets[i] = new DenseInterval<T>(
-                            preceding.LowerEndpoint, curr.UpperEndpoint);
-                    }
-                }
-                return orderedDisjointSets.Count == 1 ?
-                    orderedDisjointSets[0] :
-                    new UnionSet<T>(orderedDisjointSets.Where(i => i != null));
-            }
-        }
-
-        /// <summary>
         /// This method creates a new set which contains every element that is
         /// contained in both this set and the given set.
         /// </summary>
