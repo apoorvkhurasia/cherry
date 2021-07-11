@@ -32,6 +32,11 @@ namespace Cherry.Collections.Dense
         /// <param name="ue">The upper endpoint.</param>
         public DenseInterval(LowerEndpoint<T> le, UpperEndpoint<T> ue)
         {
+            if (!le.IsInfinite && !ue.IsInfinite &&
+                le.Value!.CompareTo(ue.Value) > 0)
+            {
+                throw new ArgumentException(SE.WRONG_BOUND_ORDER);
+            }
             LowerEndpoint = le;
             UpperEndpoint = ue;
             _disjointRep = ImmutableList.Create(this);
