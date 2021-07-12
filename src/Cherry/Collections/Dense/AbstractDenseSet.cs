@@ -2,11 +2,17 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
+using SE = Cherry.StandardExceptions;
 
 namespace Cherry.Collections.Dense
 {
+    /// <summary>
+    /// Base implementation for dense sets. Common sense but slightly
+    /// expensive implementations. Base classes can improve them when they
+    /// are able to utilise the additional information only available to them.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public abstract class AbstractDenseSet<T> : IDenseOrderedSet<T>
         where T : IComparable<T>
     {
@@ -58,7 +64,7 @@ namespace Cherry.Collections.Dense
             return UnionSet<T>.Of(complementIntervals);
         }
 
-        public bool Contains(T item)
+        public virtual bool Contains(T item)
         {
             foreach (var interval in AsDisjointIntervals())
             {
@@ -75,44 +81,83 @@ namespace Cherry.Collections.Dense
             return false; //We will never reach here
         }
 
-        public IDenseOrderedSet<T> Intersect(IDenseOrderedSet<T> another)
+        public virtual IDenseOrderedSet<T> Union(IDenseOrderedSet<T> other)
         {
-            throw new NotImplementedException();
+            SE.RequireNonNull(other, nameof(other));
+            return UnionSet<T>.Of(new[] { this, other });
         }
 
-        public bool IsProperSubsetOf(IDenseOrderedSet<T> other)
+        public virtual IDenseOrderedSet<T> Intersect(IDenseOrderedSet<T> other)
         {
-            throw new NotImplementedException();
+            SE.RequireNonNull(other, nameof(other));
+            var remDisjointIntervals = new List<IDenseOrderedSet<T>>();
+            foreach (var interval in AsDisjointIntervals())
+            {
+                foreach (var dj in other.AsDisjointIntervals())
+                {
+                    var intersection = dj.Intersect(interval);
+                    if (!intersection.IsEmpty)
+                    {
+                        remDisjointIntervals.Add(intersection);
+                    }
+                    else if (dj.LowerEndpoint >= interval.UpperEndpoint)
+                    {
+                        break;
+                    }
+                }
+            }
+            return UnionSet<T>.Of(remDisjointIntervals);
         }
 
-        public bool IsProperSupersetOf(IDenseOrderedSet<T> other)
+        public virtual bool IsProperSubsetOf(IDenseOrderedSet<T> other)
         {
-            throw new NotImplementedException();
+            SE.RequireNonNull(other, nameof(other));
+            return other.AsDisjointIntervals().All(dji =>
+                this.AsDisjointIntervals().Any(
+                    thisDji => dji.IsProperSubsetOf(thisDji)
+                )
+            );
         }
 
-        public bool IsSubsetOf(IDenseOrderedSet<T> other)
+        public virtual bool IsProperSupersetOf(IDenseOrderedSet<T> other)
         {
-            throw new NotImplementedException();
+            SE.RequireNonNull(other, nameof(other));
+            return other.AsDisjointIntervals().All(dji =>
+                this.AsDisjointIntervals().Any(
+                    thisDji => dji.IsProperSubsetOf(thisDji)
+                )
+            );
         }
 
-        public bool IsSupersetOf(IDenseOrderedSet<T> other)
+        public virtual bool IsSubsetOf(IDenseOrderedSet<T> other)
         {
-            throw new NotImplementedException();
+            SE.RequireNonNull(other, nameof(other));
+            return other.AsDisjointIntervals().All(dji =>
+                this.AsDisjointIntervals().Any(
+                    thisDji => dji.IsSubsetOf(thisDji)
+                )
+            );
         }
 
-        public bool Overlaps(IDenseOrderedSet<T> other)
+        public virtual bool IsSupersetOf(IDenseOrderedSet<T> other)
         {
-            throw new NotImplementedException();
+            SE.RequireNonNull(other, nameof(other));
+            var otherIntervals = other.AsDisjointIntervals();
+            return this.AsDisjointIntervals().All(dji =>
+             otherIntervals.Any(o => dji.IsSubsetOf(o)));
         }
 
-        public bool SetEquals(IDenseOrderedSet<T> other)
+        public virtual bool Overlaps(IDenseOrderedSet<T> other)
         {
-            throw new NotImplementedException();
+            SE.RequireNonNull(other, nameof(other));
+            return AsDisjointIntervals().Any(i => i.Overlaps(other));
         }
 
-        public IDenseOrderedSet<T> Union(IDenseOrderedSet<T> other)
+        public virtual bool SetEquals(IDenseOrderedSet<T> other) 
         {
-            throw new NotImplementedException();
+            SE.RequireNonNull(other, nameof(other));
+            return IsSubsetOf(other) && other.IsSubsetOf(this);
         }
+
     }
 }
