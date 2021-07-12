@@ -17,7 +17,7 @@ namespace  Cherry.Collections.Dense
 
         public ImmutableList<DenseInterval<T>> AsDisjointIntervals() =>
             new ComplementSet<T>(
-                new UnionSet<T>(_complementOf.AsDisjointIntervals()))
+                UnionSet<T>.Of(_complementOf.AsDisjointIntervals()))
             .AsDisjointIntervals();
 
         public IDenseOrderedSet<T> Complement() => _complementOf;

@@ -101,6 +101,35 @@ namespace Cherry.Tests.Collections.Dense
             Assert.IsTrue(interval4.SetEquals(equivalent));
         }
 
+        [TestMethod]
+        public void TestIntervalIntersection()
+        {
+            var interval1 = new DI(LED.Inclusive(1), UED.Inclusive(2));
+            var interval2 = new DI(LED.Inclusive(3), UED.Inclusive(4));
+            var intersection1 = interval1.Intersect(interval2);
+            Assert.IsTrue(intersection1.IsEmpty);
+
+            RunContainsTests(intersection1,
+                new double[] { },
+                new double[] { 1, 1.5, 2 - EPSILON, 2, 3, 3.5, 4 - EPSILON, 4,
+                               1 - EPSILON, 2 + EPSILON, 
+                               3 - EPSILON, 4 + EPSILON});
+
+            //Reflexivity
+            intersection1 = interval2.Intersect(interval1);
+            Assert.IsTrue(intersection1.IsEmpty);
+
+            RunContainsTests(intersection1,
+                new double[] { },
+                new double[] { 1, 1.5, 2 - EPSILON, 2, 3, 3.5, 4 - EPSILON, 4,
+                               1 - EPSILON, 2 + EPSILON,
+                               3 - EPSILON, 4 + EPSILON});
+
+            var interval3 = interval1.Union(interval2);
+            Assert.IsTrue(interval3.Intersect(interval1).SetEquals(interval1));
+            Assert.IsTrue(interval3.Intersect(interval2).SetEquals(interval2));
+        }
+
         private void RunContainsTests<T>(IDenseOrderedSet<T> interval, 
             IEnumerable<T> containedPoints, 
             IEnumerable<T> notContainedPoints) where T : IComparable<T>

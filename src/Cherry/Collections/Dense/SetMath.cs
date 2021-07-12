@@ -6,7 +6,7 @@ namespace Cherry.Collections.Dense
 {
     internal static class SetMath
     {
-        public static List<DenseInterval<T>> Union<T>(
+        public static List<DenseInterval<T>> OptimalDisjointSetUnion<T>(
             IEnumerable<IDenseOrderedSet<T>> sets)
             where T : IComparable<T>
         {

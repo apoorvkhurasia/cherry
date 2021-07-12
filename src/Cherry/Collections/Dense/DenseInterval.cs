@@ -47,7 +47,7 @@ namespace Cherry.Collections.Dense
         /// contains every element of type <typeparamref name="T"/>.
         /// </summary>
         public static DenseInterval<T> UniverseInstance { get; } =
-            new(LowerEndpoint<T>.NegativeInfinity(), 
+            new(LowerEndpoint<T>.NegativeInfinity(),
                 UpperEndpoint<T>.PositiveInfinity());
 
         /// <summary>
@@ -59,6 +59,37 @@ namespace Cherry.Collections.Dense
         /// The upper endpoint of this interval.
         /// </summary>
         public UpperEndpoint<T> UpperEndpoint { get; }
+
+        /// <summary>
+        /// Gets the position of the given item with respect to the
+        /// endpoints of this interval.
+        /// </summary>
+        /// <param name="item">The item to check.</param>
+        /// <returns>The position of the given item with respect to the
+        /// endpoints of this interval.</returns>
+        public Position GetPosition(T item)
+        {
+            if (item < LowerEndpoint)
+            {
+                return Position.LOWER;
+            }
+            else if (item == LowerEndpoint)
+            {
+                return Position.AT_LOWER_ENDPOINT;
+            }
+            else if (item < UpperEndpoint)
+            {
+                return Position.WITHIN;
+            }
+            else if (item == UpperEndpoint)
+            {
+                return Position.AT_UPPER_ENDPOINT;
+            }
+            else
+            {
+                return Position.UPPER;
+            }
+        }
 
         /// <summary>
         /// <see langword="true"></see> if and only if this set contains no
@@ -74,7 +105,7 @@ namespace Cherry.Collections.Dense
         /// element of type <typeparamref name="T"/>. 
         /// <see langword="false"/> otherwise.
         /// </summary>
-        public bool IsUniverse => 
+        public bool IsUniverse =>
             LowerEndpoint.IsInfinite && UpperEndpoint.IsInfinite;
 
         /// <summary>
@@ -88,12 +119,22 @@ namespace Cherry.Collections.Dense
         /// <returns><see langword="true"></see> if and only if this set
         /// contains the given element. <see langword="false"/> otherwise.
         /// </returns>
-        /// <exception cref="ArgumentNullException">The value to
-        /// check cannot be null.</exception>
-        public bool Contains(T value)
+        public bool Contains(T value) => 
+            LowerEndpoint <= value && UpperEndpoint >= value;
+
+        /// <summary>
+		/// Returns another set which contains elements of this set and the
+		/// given set.
+		/// </summary>
+		/// <param name="other">Another set.</param>
+		/// <returns>A set which contains elements of this set and the
+		/// given set.</returns>
+        /// <exception cref="ArgumentNullException">The given set cannot
+        /// be null.</exception>
+        public IDenseOrderedSet<T> Union(IDenseOrderedSet<T> other)
         {
-            SE.RequireNonNull(value, nameof(value));
-            return LowerEndpoint <= value && UpperEndpoint >= value;
+            SE.RequireNonNull(other, nameof(other));
+            return UnionSet<T>.Of(new[] { this, other });
         }
 
         /// <summary>
@@ -106,25 +147,27 @@ namespace Cherry.Collections.Dense
         /// set.</returns>
         /// <exception cref="ArgumentNullException">The given set cannot
         /// be null.</exception>
-        public IDenseOrderedSet<T> Intersect(IDenseOrderedSet<T> other) =>
-            new UnionSet<T>(
-                this.AsDisjointIntervals()
-                    .SelectMany(
-                        i => other.AsDisjointIntervals(),
-                        (i1, i2) => i1.Intersect(i2))
-                    .Where(interval => !interval.IsEmpty));
+        public IDenseOrderedSet<T> Intersect(IDenseOrderedSet<T> other)
+        {
+            SE.RequireNonNull(other, nameof(other));
+            return UnionSet<T>.Of(
+                this.AsDisjointIntervals().SelectMany(
+                    i => other.AsDisjointIntervals(),
+                    (i1, i2) => i1.Intersect(i2))
+                .Where(interval => !interval.IsEmpty));
+        }
 
         /// <summary>
-        /// This method creates a new set which contains every element that is
-        /// contained in both this interval and the given interval.
+        /// This method creates a new set which contains every element that 
+        /// is contained in both this interval and the given interval.
         /// </summary>
         /// <param name="other">The other interval. Cannot be null.</param>
-        /// <returns>The intersection set which contains only those elements
+        /// <returns>A set which contains only those elements
         /// which are contained in both this interval and the other given
         /// interval.</returns>
         /// <exception cref="ArgumentNullException">The given interval cannot
         /// be null.</exception>
-        public IDenseOrderedSet<T> Interset(DenseInterval<T> other)
+        public IDenseOrderedSet<T> Intersect(DenseInterval<T> other)
         {
             SE.RequireNonNull(other, nameof(other));
             if (IsSubsetOf(other))
@@ -186,11 +229,16 @@ namespace Cherry.Collections.Dense
             other.AsDisjointIntervals().Any(Overlaps);
 
         public bool Overlaps(DenseInterval<T> other) =>
-            !Intersect(other).IsEmpty;
+            other.UpperEndpoint >= this.LowerEndpoint
+            && other.LowerEndpoint <= this.UpperEndpoint;
 
-        public bool IsConnected(DenseInterval<T> other) => 
-            UpperEndpoint <= other.LowerEndpoint
-                && other.LowerEndpoint <= UpperEndpoint;
+        public bool IsConnected(DenseInterval<T> other)
+        {
+            return (other.UpperEndpoint.IsInfinite || this.LowerEndpoint.IsInfinite ||
+                other.UpperEndpoint.Value!.CompareTo(this.LowerEndpoint.Value!) >= 0)
+                && (other.LowerEndpoint.IsInfinite || this.UpperEndpoint.IsInfinite ||
+                other.LowerEndpoint.Value!.CompareTo(this.UpperEndpoint.Value!) <= 0);
+        }
 
         public bool SetEquals(IDenseOrderedSet<T> other)
         {
@@ -236,7 +284,7 @@ namespace Cherry.Collections.Dense
                 var ue = LowerEndpoint.IsInclusive ?
                     UpperEndpoint<T>.Exclusive(LowerEndpoint.Value!) :
                     UpperEndpoint<T>.Inclusive(LowerEndpoint.Value!);
-                return new UnionSet<T>(new[]
+                return UnionSet<T>.Of(new[]
                 {
                     new DenseInterval<T>(
                         LowerEndpoint<T>.NegativeInfinity(), ue),

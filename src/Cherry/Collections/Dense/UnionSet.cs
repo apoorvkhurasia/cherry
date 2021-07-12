@@ -5,15 +5,52 @@ using System.Linq;
 
 namespace Cherry.Collections.Dense
 {
-    internal sealed class UnionSet<T>
+    public sealed class UnionSet<T>
         : IDenseOrderedSet<T> where T : IComparable<T>
     {
         private readonly ImmutableList<DenseInterval<T>> _disjointIntervalRep;
 
-        internal UnionSet(IEnumerable<IDenseOrderedSet<T>> of)
+        private UnionSet(IList<DenseInterval<T>> of)
         {
-            _disjointIntervalRep = SetMath.Union(of).ToImmutableList();
+            _disjointIntervalRep = of.ToImmutableList();
             IsEmpty = _disjointIntervalRep.Count > 0;
+        }
+
+        public static IDenseOrderedSet<T> Of(
+            IEnumerable<IDenseOrderedSet<T>> sets)
+        {
+            var orderedDisjointSets =
+                sets.SelectMany(s => s.AsDisjointIntervals())
+                .Where(s => !s.IsEmpty)
+                .OrderBy(i => i.LowerEndpoint)
+                .ThenBy(i => i.UpperEndpoint)
+                .ToList();
+            for (int i = 1; i < orderedDisjointSets.Count; i++)
+            {
+                var preceding = orderedDisjointSets[i - 1];
+                var curr = orderedDisjointSets[i];
+                if (curr.IsConnected(preceding))
+                {
+                    orderedDisjointSets[i - 1] = null!;
+                    orderedDisjointSets[i] = new DenseInterval<T>(
+                        preceding.LowerEndpoint, curr.UpperEndpoint);
+                }
+            }
+
+            var disconnectedSets = orderedDisjointSets
+                .Where(s => s is not null).ToList();
+            if (disconnectedSets.Count == 0)
+            {
+                return EmptySet<T>.Instance;
+            }
+            else if (disconnectedSets.Count == 1)
+            {
+                return disconnectedSets[0];
+            }
+            else
+            {
+                return new UnionSet<T>(disconnectedSets);
+            }
         }
 
         public bool IsEmpty { get; }
@@ -26,9 +63,13 @@ namespace Cherry.Collections.Dense
         public bool Contains(T item) =>
             _disjointIntervalRep.Any(s => s.Contains(item));
 
-        public IDenseOrderedSet<T> Intersect(IDenseOrderedSet<T> another) =>
-            new SetIntersection<T>(Enumerable.Concat(_disjointIntervalRep,
-                Enumerable.Repeat(another, 1)));
+        public IDenseOrderedSet<T> Union(IDenseOrderedSet<T> other) => 
+            UnionSet<T>.Of(new[] { this, other });
+
+        public IDenseOrderedSet<T> Intersect(IDenseOrderedSet<T> another)
+        {
+
+        }
 
         public bool IsProperSubsetOf(IDenseOrderedSet<T> other) =>
             other.AsDisjointIntervals().All(dji =>
