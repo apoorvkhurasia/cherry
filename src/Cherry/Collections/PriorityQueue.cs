@@ -404,9 +404,14 @@ namespace Cherry.Collections
 
         #region Implementation
 
+        /* This warning is not really applicable in this case
+         * because these fields are readonly and will always have
+         * the same value in all combinations of T */
+#pragma warning disable S2743 // Static fields should not be used in generic types
         private static readonly int GROW_FACTOR = 2;
         private static readonly int MIN_GROW_SIZE = 4;
         private static readonly double SHRINK_THRESHOLD_FACTOR = 0.9;
+#pragma warning restore S2743 // Static fields should not be used in generic types
 
         private T[] _backingArray;
         private readonly IComparer<T> _comparer;

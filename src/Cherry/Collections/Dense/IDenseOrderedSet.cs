@@ -130,5 +130,14 @@ namespace  Cherry.Collections.Dense
         /// </summary>
         /// <returns></returns>
 		ImmutableList<DenseInterval<T>> AsDisjointIntervals();
-	}
+
+        /// <summary>
+        /// Gets the length of this set using the given measure.
+        /// </summary>
+        /// <param name="measureFunction">The measure. This function
+        /// should be able to handle infinities as configured in 
+        /// <see cref="TypeConfiguration"/>.</param>
+        /// <returns>The length of this set.</returns>
+        double GetLength(Func<T?, T?, double> measureFunction);
+    }
 }

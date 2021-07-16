@@ -13,7 +13,7 @@ namespace Cherry.Benchmarks.PriorityQueue
         private SortedSet<int> _sortedSet;
         private List<int> _list;
 
-        private List<int> _numsToCheck;
+        private readonly List<int> _numsToCheck;
 
         public ContainsBenchmark() : base(5000)
         {
@@ -53,7 +53,7 @@ namespace Cherry.Benchmarks.PriorityQueue
         private static int GetNumOfMatches<T1>(
             ICollection<T1> @in, IEnumerable<T1> of)
         {
-            return of.Where(@in.Contains).Count();
+            return of.Count(@in.Contains);
         }
     }
 }

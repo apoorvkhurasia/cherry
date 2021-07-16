@@ -49,11 +49,15 @@ namespace Cherry.Collections
         {
             if (index < 0)
             {
+#pragma warning disable S112 // General exceptions should never be thrown
                 throw new IndexOutOfRangeException(SE.IndexNonNegative);
+#pragma warning restore S112 // General exceptions should never be thrown
             }
             if (index >= list.Count)
             {
+#pragma warning disable S112 // General exceptions should never be thrown
                 throw new IndexOutOfRangeException(SE.IndexLargerThanCount);
+#pragma warning restore S112 // General exceptions should never be thrown
             }
         }
 

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
+using System.Diagnostics;
 
 using SE = Cherry.StandardExceptions;
 
@@ -19,12 +18,8 @@ namespace Cherry.Collections.Dense
     /// <seealso cref="LowerEndpoint{T}" />
     /// <seealso cref="UpperEndpoint{T}" />
     /// <typeparam name="T"></typeparam>
-    public sealed class DenseInterval<T> : IDenseOrderedSet<T>
-        where T : IComparable<T>
+    public sealed class DenseInterval<T> where T : IComparable<T>
     {
-
-        private readonly ImmutableList<DenseInterval<T>> _disjointRep;
-
         /// <summary>
         /// Constructs an instance of this class from the given endpoints.
         /// </summary>
@@ -39,14 +34,13 @@ namespace Cherry.Collections.Dense
             }
             LowerEndpoint = le;
             UpperEndpoint = ue;
-            _disjointRep = ImmutableList.Create(this);
         }
 
         /// <summary>
         /// The universe set is a special instance of this class. This set
         /// contains every element of type <typeparamref name="T"/>.
         /// </summary>
-        public static DenseInterval<T> UniverseInstance { get; } =
+        public static DenseInterval<T> Universe { get; } =
             new(LowerEndpoint<T>.NegativeInfinity(),
                 UpperEndpoint<T>.PositiveInfinity());
 
@@ -67,27 +61,27 @@ namespace Cherry.Collections.Dense
         /// <param name="item">The item to check.</param>
         /// <returns>The position of the given item with respect to the
         /// endpoints of this interval.</returns>
-        public Position GetPosition(T item)
+        public PointPosition GetPosition(T item)
         {
             if (item < LowerEndpoint)
             {
-                return Position.LOWER;
+                return PointPosition.LOWER;
             }
             else if (item == LowerEndpoint)
             {
-                return Position.AT_LOWER_ENDPOINT;
+                return PointPosition.AT_LOWER_ENDPOINT;
             }
             else if (item < UpperEndpoint)
             {
-                return Position.WITHIN;
+                return PointPosition.WITHIN;
             }
             else if (item == UpperEndpoint)
             {
-                return Position.AT_UPPER_ENDPOINT;
+                return PointPosition.AT_UPPER_ENDPOINT;
             }
             else
             {
-                return Position.UPPER;
+                return PointPosition.UPPER;
             }
         }
 
@@ -123,41 +117,6 @@ namespace Cherry.Collections.Dense
             LowerEndpoint <= value && UpperEndpoint >= value;
 
         /// <summary>
-		/// Returns another set which contains elements of this set and the
-		/// given set.
-		/// </summary>
-		/// <param name="other">Another set.</param>
-		/// <returns>A set which contains elements of this set and the
-		/// given set.</returns>
-        /// <exception cref="ArgumentNullException">The given set cannot
-        /// be null.</exception>
-        public IDenseOrderedSet<T> Union(IDenseOrderedSet<T> other)
-        {
-            SE.RequireNonNull(other, nameof(other));
-            return UnionSet<T>.Of(new[] { this, other });
-        }
-
-        /// <summary>
-        /// This method creates a new set which contains every element that is
-        /// contained in both this set and the given set.
-        /// </summary>
-        /// <param name="other">The other set. Cannot be null.</param>
-        /// <returns>The intersection set which contains only those elements
-        /// which are contained in both this set and the other given
-        /// set.</returns>
-        /// <exception cref="ArgumentNullException">The given set cannot
-        /// be null.</exception>
-        public IDenseOrderedSet<T> Intersect(IDenseOrderedSet<T> other)
-        {
-            SE.RequireNonNull(other, nameof(other));
-            return UnionSet<T>.Of(
-                this.AsDisjointIntervals().SelectMany(
-                    i => other.AsDisjointIntervals(),
-                    (i1, i2) => i1.Intersect(i2))
-                .Where(interval => !interval.IsEmpty));
-        }
-
-        /// <summary>
         /// This method creates a new set which contains every element that 
         /// is contained in both this interval and the given interval.
         /// </summary>
@@ -167,7 +126,7 @@ namespace Cherry.Collections.Dense
         /// interval.</returns>
         /// <exception cref="ArgumentNullException">The given interval cannot
         /// be null.</exception>
-        public IDenseOrderedSet<T> Intersect(DenseInterval<T> other)
+        public DenseInterval<T> Intersect(DenseInterval<T> other)
         {
             SE.RequireNonNull(other, nameof(other));
             if (IsSubsetOf(other))
@@ -190,47 +149,48 @@ namespace Cherry.Collections.Dense
                 return new DenseInterval<T>(
                     other.LowerEndpoint, this.UpperEndpoint);
             }
+            else if (this.LowerEndpoint.IsInclusive)
+            {
+                return new DenseInterval<T>(
+                    LowerEndpoint<T>.Exclusive(this.LowerEndpoint.Value!),
+                    UpperEndpoint<T>.Exclusive(this.LowerEndpoint.Value!));
+            }
             else
             {
-                return EmptySet<T>.Instance;
+                Debug.Assert(this.UpperEndpoint.IsInclusive);
+                return new DenseInterval<T>(
+                    LowerEndpoint<T>.Exclusive(this.UpperEndpoint.Value!),
+                    UpperEndpoint<T>.Exclusive(this.UpperEndpoint.Value!));
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="other"></param>
-        /// <returns></returns>
-        public bool IsProperSubsetOf(IDenseOrderedSet<T> other) =>
-            other.AsDisjointIntervals().Any(IsProperSubsetOf);
-
-        public bool IsProperSupersetOf(IDenseOrderedSet<T> other) =>
-            other.AsDisjointIntervals().All(IsProperSupersetOf);
-
-        public bool IsProperSupersetOf(DenseInterval<T> other) =>
+        public bool IsProperSubsetOf(DenseInterval<T> other) =>
             other.LowerEndpoint < LowerEndpoint &&
             other.UpperEndpoint > UpperEndpoint;
-
-        public bool IsSubsetOf(IDenseOrderedSet<T> other) =>
-            other.AsDisjointIntervals().Any(IsSubsetOf);
 
         public bool IsSubsetOf(DenseInterval<T> other) =>
             other.LowerEndpoint <= this.LowerEndpoint &&
             other.UpperEndpoint >= this.UpperEndpoint;
 
-        public bool IsSupersetOf(IDenseOrderedSet<T> other) =>
-            other.AsDisjointIntervals().All(IsProperSupersetOf);
-
         public bool IsSupersetOf(DenseInterval<T> other) =>
-            other.LowerEndpoint <= LowerEndpoint &&
-            other.UpperEndpoint >= UpperEndpoint;
+            other.LowerEndpoint >= LowerEndpoint &&
+            other.UpperEndpoint <= UpperEndpoint;
 
-        public bool Overlaps(IDenseOrderedSet<T> other) =>
-            other.AsDisjointIntervals().Any(Overlaps);
+        public bool IsProperSupersetOf(DenseInterval<T> other) =>
+            other.LowerEndpoint > LowerEndpoint &&
+            other.UpperEndpoint < UpperEndpoint;
 
         public bool Overlaps(DenseInterval<T> other) =>
             other.UpperEndpoint >= this.LowerEndpoint
             && other.LowerEndpoint <= this.UpperEndpoint;
+
+        public bool IsLower(DenseInterval<T> other) =>
+            this.LowerEndpoint < other.LowerEndpoint &&
+            this.UpperEndpoint <= other.LowerEndpoint;
+
+        public bool IsUpper(DenseInterval<T> other) =>
+            this.LowerEndpoint >= other.UpperEndpoint &&
+            this.UpperEndpoint > other.UpperEndpoint;
 
         public bool IsConnected(DenseInterval<T> other)
         {
@@ -240,65 +200,26 @@ namespace Cherry.Collections.Dense
                 other.LowerEndpoint.Value!.CompareTo(this.UpperEndpoint.Value!) <= 0);
         }
 
-        public bool SetEquals(IDenseOrderedSet<T> other)
+        public override bool Equals(object? obj)
         {
-            if (ReferenceEquals(this, other))
+            if (ReferenceEquals(this, obj))
             {
                 return true;
             }
 
-            return other is DenseInterval<T> interval
+            return obj is DenseInterval<T> interval
                 && LowerEndpoint.Equals(interval.LowerEndpoint)
                 && UpperEndpoint.Equals(interval.UpperEndpoint);
         }
 
-        public IDenseOrderedSet<T> Complement()
-        {
-            if (this.IsUniverse)
-            {
-                return EmptySet<T>.Instance;
-            }
-            else if (LowerEndpoint.IsInfinite)
-            {
-                var le = UpperEndpoint.IsInclusive ?
-                    LowerEndpoint<T>.Exclusive(UpperEndpoint.Value!) :
-                    LowerEndpoint<T>.Inclusive(UpperEndpoint.Value!);
-
-                return new DenseInterval<T>(
-                    le, UpperEndpoint<T>.PositiveInfinity());
-            }
-            else if (UpperEndpoint.IsInfinite)
-            {
-                var ue = LowerEndpoint.IsInclusive ?
-                    UpperEndpoint<T>.Exclusive(LowerEndpoint.Value!) :
-                    UpperEndpoint<T>.Inclusive(LowerEndpoint.Value!);
-
-                return new DenseInterval<T>(
-                    LowerEndpoint<T>.NegativeInfinity(), ue);
-            }
-            else
-            {
-                var le = UpperEndpoint.IsInclusive ?
-                       LowerEndpoint<T>.Exclusive(UpperEndpoint.Value!) :
-                       LowerEndpoint<T>.Inclusive(UpperEndpoint.Value!);
-                var ue = LowerEndpoint.IsInclusive ?
-                    UpperEndpoint<T>.Exclusive(LowerEndpoint.Value!) :
-                    UpperEndpoint<T>.Inclusive(LowerEndpoint.Value!);
-                return UnionSet<T>.Of(new[]
-                {
-                    new DenseInterval<T>(
-                        LowerEndpoint<T>.NegativeInfinity(), ue),
-                    new DenseInterval<T>(
-                        le, UpperEndpoint<T>.PositiveInfinity())
-                });
-            }
-        }
-
-        public ImmutableList<DenseInterval<T>> AsDisjointIntervals() => 
-            _disjointRep;
+        public override int GetHashCode() =>
+            HashCode.Combine(LowerEndpoint, UpperEndpoint);
 
         public override string ToString() =>
             $"{LowerEndpoint}, {UpperEndpoint}";
+
+        public double GetLength(Func<T?, T?, double> measureFunction) => 
+            measureFunction(LowerEndpoint.Value, UpperEndpoint.Value);
 
     }
 }

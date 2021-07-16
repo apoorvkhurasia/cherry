@@ -73,9 +73,9 @@ namespace Cherry.Examples
                 Priority = priority;
             }
 
-            public override bool Equals(object other)
+            public override bool Equals(object obj)
             {
-                return other is ExampleItem i && i.Name == this.Name;
+                return obj is ExampleItem i && i.Name == this.Name;
             }
 
             public override int GetHashCode() => Name.GetHashCode();
