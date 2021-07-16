@@ -93,6 +93,112 @@ namespace Cherry.Tests.Collections.Dense
                                3 - EPSILON, 4 + EPSILON});
         }
 
+        [TestMethod]
+        public void TestSubsetIntersection()
+        {
+            var interval1 = new DI(LED.Inclusive(1), UED.Inclusive(2));
+            var interval2 = new DI(LED.Inclusive(1.2), UED.Inclusive(1.5));
+
+            Assert.AreEqual(interval2, interval1.Intersect(interval2));
+            Assert.AreEqual(interval2, interval2.Intersect(interval1));
+        }
+
+        [TestMethod]
+        public void TestOverlapIntersection()
+        {
+            var interval1 = new DI(LED.Inclusive(1), UED.Exclusive(2));
+            var interval2 = new DI(LED.Inclusive(1.5), UED.Exclusive(3));
+            var expected1 = new DI(LED.Inclusive(1.5), UED.Exclusive(2));
+            Assert.AreEqual(expected1, interval1.Intersect(interval2));
+            Assert.AreEqual(expected1, interval2.Intersect(interval1));
+
+            var interval3 = new DI(LED.Exclusive(1), UED.Inclusive(2));
+            var interval4 = new DI(LED.Exclusive(1.2), UED.PositiveInfinity());
+            var expected2 = new DI(LED.Exclusive(1.2), UED.Inclusive(2));
+            Assert.AreEqual(expected2, interval3.Intersect(interval4));
+            Assert.AreEqual(expected2, interval4.Intersect(interval3));
+        }
+
+        [TestMethod]
+        public void TestNoOverlapIntersection()
+        {
+            var interval1 = new DI(LED.Inclusive(1), UED.Inclusive(2));
+            var interval2 = new DI(LED.Exclusive(2), UED.Inclusive(3));
+            Assert.IsTrue(interval1.Intersect(interval2).IsEmpty);
+            Assert.IsTrue(interval2.Intersect(interval1).IsEmpty);
+
+            var interval3 = new DI(LED.Inclusive(1), UED.Exclusive(2));
+            var interval4 = new DI(LED.Inclusive(2), UED.Exclusive(3));
+            Assert.IsTrue(interval3.Intersect(interval4).IsEmpty);
+            Assert.IsTrue(interval4.Intersect(interval3).IsEmpty);
+
+            var interval5 = new DI(LED.NegativeInfinity(), UED.Exclusive(2));
+            var interval6 = new DI(LED.Inclusive(2), UED.PositiveInfinity());
+            Assert.IsTrue(interval5.Intersect(interval6).IsEmpty);
+            Assert.IsTrue(interval6.Intersect(interval5).IsEmpty);
+        }
+
+        [TestMethod]
+        public void TestProperSubset()
+        {
+            var interval1 = new DI(LED.Inclusive(1), UED.Inclusive(2));
+            Assert.IsFalse(interval1.IsProperSubsetOf(interval1));
+
+            var interval2 = new DI(LED.Exclusive(2), UED.Inclusive(3));
+            Assert.IsFalse(interval1.IsProperSubsetOf(interval2));
+            Assert.IsFalse(interval2.IsProperSubsetOf(interval1));
+
+            var interval3 = new DI(LED.Inclusive(1.4), UED.Exclusive(2));
+            Assert.IsTrue(interval3.IsProperSubsetOf(interval1));
+            Assert.IsTrue(interval1.IsProperSupersetOf(interval3));
+
+            var interval4 = new DI(LED.Inclusive(1.4), UED.Inclusive(2));
+            Assert.IsFalse(interval4.IsProperSubsetOf(interval1));
+            Assert.IsFalse(interval1.IsProperSupersetOf(interval4));
+        }
+
+        [TestMethod]
+        public void TestSubset()
+        {
+            var interval1 = new DI(LED.Inclusive(1), UED.Inclusive(2));
+            Assert.IsTrue(interval1.IsSubsetOf(interval1));
+
+            var interval2 = new DI(LED.Exclusive(2), UED.Inclusive(3));
+            Assert.IsFalse(interval1.IsSubsetOf(interval2));
+            Assert.IsFalse(interval2.IsSubsetOf(interval1));
+
+            var interval3 = new DI(LED.Inclusive(1.4), UED.Exclusive(2));
+            Assert.IsTrue(interval3.IsSubsetOf(interval1));
+            Assert.IsTrue(interval1.IsSupersetOf(interval3));
+
+            var interval4 = new DI(LED.Inclusive(1.4), UED.Inclusive(2));
+            Assert.IsTrue(interval4.IsSubsetOf(interval1));
+            Assert.IsTrue(interval1.IsSupersetOf(interval4));
+        }
+
+        [TestMethod]
+        public void TestOverlap()
+        {
+            var interval1 = new DI(LED.Inclusive(1), UED.Inclusive(2));
+            Assert.IsTrue(interval1.Overlaps(interval1));
+
+            var interval2 = new DI(LED.Exclusive(2), UED.Inclusive(3));
+            Assert.IsFalse(interval1.Overlaps(interval2));
+            Assert.IsFalse(interval2.Overlaps(interval1));
+
+            var interval3 = new DI(LED.Inclusive(1.4), UED.Exclusive(2));
+            Assert.IsTrue(interval3.Overlaps(interval1));
+            Assert.IsTrue(interval1.Overlaps(interval3));
+
+            var interval4 = new DI(LED.Inclusive(1.4), UED.Inclusive(2));
+            Assert.IsTrue(interval4.Overlaps(interval1));
+            Assert.IsTrue(interval1.Overlaps(interval4));
+
+            var interval5 = new DI(LED.Exclusive(2), UED.Inclusive(3));
+            Assert.IsFalse(interval1.Overlaps(interval5));
+            Assert.IsFalse(interval5.Overlaps(interval1));
+        }
+
         private void RunContainsTests<T>(DenseInterval<T> interval, 
             IEnumerable<T> containedPoints, 
             IEnumerable<T> notContainedPoints) where T : IComparable<T>

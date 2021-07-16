@@ -131,11 +131,11 @@ namespace Cherry.Collections.Dense
             SE.RequireNonNull(other, nameof(other));
             if (IsSubsetOf(other))
             {
-                return other;
+                return this;
             }
             else if (other.IsSubsetOf(this))
             {
-                return this;
+                return other;
             }
             else if (other.UpperEndpoint > this.LowerEndpoint &&
                 other.UpperEndpoint <= this.UpperEndpoint)
@@ -149,7 +149,7 @@ namespace Cherry.Collections.Dense
                 return new DenseInterval<T>(
                     other.LowerEndpoint, this.UpperEndpoint);
             }
-            else if (this.LowerEndpoint.IsInclusive)
+            else if (!this.LowerEndpoint.IsInfinite)
             {
                 return new DenseInterval<T>(
                     LowerEndpoint<T>.Exclusive(this.LowerEndpoint.Value!),
@@ -157,49 +157,173 @@ namespace Cherry.Collections.Dense
             }
             else
             {
-                Debug.Assert(this.UpperEndpoint.IsInclusive);
+                Debug.Assert(!this.UpperEndpoint.IsInfinite);
                 return new DenseInterval<T>(
                     LowerEndpoint<T>.Exclusive(this.UpperEndpoint.Value!),
                     UpperEndpoint<T>.Exclusive(this.UpperEndpoint.Value!));
             }
         }
 
-        public bool IsProperSubsetOf(DenseInterval<T> other) =>
-            other.LowerEndpoint < LowerEndpoint &&
-            other.UpperEndpoint > UpperEndpoint;
+        /// <summary>
+        /// Returns <see langword="true" /> if and only if this
+        /// interval is fully contained in the given interval. This means
+        /// that all the points in this interval lie in the given
+        /// interval but there are points in the given interval which do
+        /// not lie in this interval. <see langword="false" /> otherwise.
+        /// </summary>
+        /// <param name="other">The interval to check.</param>
+        /// <returns>Returns <see langword="true" /> if and only if this
+        /// interval is fully contained in the given interval.
+        /// <see langword="false" /> otherwise.</returns>
+        /// <exception cref="ArgumentNullException">The given interval cannot
+        /// be null.</exception>
+        public bool IsProperSubsetOf(DenseInterval<T> other)
+        {
+            SE.RequireNonNull(other, nameof(other));
+            return other.LowerEndpoint < LowerEndpoint
+                && other.UpperEndpoint > UpperEndpoint;
+        }
 
-        public bool IsSubsetOf(DenseInterval<T> other) =>
-            other.LowerEndpoint <= this.LowerEndpoint &&
-            other.UpperEndpoint >= this.UpperEndpoint;
+        /// <summary>
+        /// Returns <see langword="true" /> if and only if the given
+        /// interval is fully contained in this interval. This means
+        /// that all the points in the given interval lie in this
+        /// interval but there are points in this interval which do
+        /// not lie in the given interval. <see langword="false" /> otherwise.
+        /// </summary>
+        /// <param name="other">The interval to check.</param>
+        /// <returns>Returns <see langword="true" /> if and only if the
+        /// given interval is fully contained in this interval.
+        /// <see langword="false" /> otherwise.</returns>
+        /// <exception cref="ArgumentNullException">The given interval cannot
+        /// be null.</exception>
+        public bool IsProperSupersetOf(DenseInterval<T> other)
+        {
+            SE.RequireNonNull(other, nameof(other));
+            return other.IsProperSubsetOf(this);
+        }
 
-        public bool IsSupersetOf(DenseInterval<T> other) =>
-            other.LowerEndpoint >= LowerEndpoint &&
-            other.UpperEndpoint <= UpperEndpoint;
+        /// <summary>
+        /// Returns <see langword="true" /> if and only if all the points
+        /// in this interval lie in the given interval.
+        /// <see langword="false" /> otherwise.
+        /// </summary>
+        /// <param name="other">The interval to check.</param>
+        /// <returns>Returns <see langword="true" /> if and only if all
+        /// the points in this interval lie in the given interval.
+        /// <see langword="false" /> otherwise.</returns>
+        /// <exception cref="ArgumentNullException">The given interval cannot
+        /// be null.</exception>
+        public bool IsSubsetOf(DenseInterval<T> other)
+        {
+            SE.RequireNonNull(other, nameof(other));
+            return other.LowerEndpoint <= this.LowerEndpoint
+                && other.UpperEndpoint >= this.UpperEndpoint;
+        }
 
-        public bool IsProperSupersetOf(DenseInterval<T> other) =>
-            other.LowerEndpoint > LowerEndpoint &&
-            other.UpperEndpoint < UpperEndpoint;
+        /// <summary>
+        /// Returns <see langword="true" /> if and only if all the points
+        /// in the given interval lie in this interval.
+        /// <see langword="false" /> otherwise.
+        /// </summary>
+        /// <param name="other">The interval to check.</param>
+        /// <returns>Returns <see langword="true" /> if and only if all the
+        /// points in the given interval lie in this interval.
+        /// <see langword="false" /> otherwise.</returns>
+        /// <exception cref="ArgumentNullException">The given interval cannot
+        /// be null.</exception>
+        public bool IsSupersetOf(DenseInterval<T> other)
+        {
+            SE.RequireNonNull(other, nameof(other));
+            return other.IsSubsetOf(this);
+        }
 
-        public bool Overlaps(DenseInterval<T> other) =>
-            other.UpperEndpoint >= this.LowerEndpoint
-            && other.LowerEndpoint <= this.UpperEndpoint;
+        /// <summary>
+        /// Returns <see langword="true" /> if and only if there
+        /// is at least one point which lies in this as well as the
+        /// given interval. <see langword="false" /> otherwise.
+        /// </summary>
+        /// <param name="other">The interval to check.</param>
+        /// <returns>Returns <see langword="true" /> if and only if there
+        /// is at least one point which lies in this as well as the
+        /// given interval. <see langword="false" /> otherwise.</returns>
+        /// <exception cref="ArgumentNullException">The given interval cannot
+        /// be null.</exception>
+        public bool Overlaps(DenseInterval<T> other)
+        {
+            SE.RequireNonNull(other, nameof(other));
+            return other.UpperEndpoint >= this.LowerEndpoint
+                && other.LowerEndpoint <= this.UpperEndpoint;
+        }
 
-        public bool IsLower(DenseInterval<T> other) =>
-            this.LowerEndpoint < other.LowerEndpoint &&
-            this.UpperEndpoint <= other.LowerEndpoint;
+        /// <summary>
+        /// Returns <see langword="true" /> if and only if all
+        /// the points in this interval are less than every
+        /// point in the given interval. <see langword="false" /> otherwise.
+        /// </summary>
+        /// <param name="other">The interval to check.</param>
+        /// <returns>Returns <see langword="true" /> if and only if all
+        /// the points in this interval are less than every
+        /// point in the given interval.
+        /// <see langword="false" /> otherwise.</returns>
+        /// <exception cref="ArgumentNullException">The given interval cannot
+        /// be null.</exception>
+        public bool IsLower(DenseInterval<T> other)
+        {
+            SE.RequireNonNull(other, nameof(other));
+            return this.LowerEndpoint < other.LowerEndpoint
+                && this.UpperEndpoint < other.LowerEndpoint;
+        }
 
-        public bool IsUpper(DenseInterval<T> other) =>
-            this.LowerEndpoint >= other.UpperEndpoint &&
-            this.UpperEndpoint > other.UpperEndpoint;
+        /// <summary>
+        /// Returns <see langword="true" /> if and only if all
+        /// the points in this interval are greater than every
+        /// point in the given interval. <see langword="false" /> otherwise.
+        /// </summary>
+        /// <param name="other">The interval to check.</param>
+        /// <returns>Returns <see langword="true" /> if and only if all
+        /// the points in this interval are greater than every
+        /// point in the given interval.
+        /// <see langword="false" /> otherwise.</returns>
+        /// <exception cref="ArgumentNullException">The given interval cannot
+        /// be null.</exception>
+        public bool IsUpper(DenseInterval<T> other)
+        {
+            SE.RequireNonNull(other, nameof(other));
+            return this.LowerEndpoint > other.UpperEndpoint
+                && this.UpperEndpoint > other.UpperEndpoint;
+        }
 
+        /// <summary>
+        /// Returns <see langword="true" /> if and only if the two intervals
+        /// overlap or when their boundary points coincide even if the
+        /// intersection has a 0 measure. <see langword="false" /> otherwise.
+        /// </summary>
+        /// <param name="other">The interval to check.</param>
+        /// <returns>Returns <see langword="true" /> if and only if the two intervals
+        /// overlap or when their boundary points coincide even if the
+        /// intersection has a 0 measure. <see langword="false" /> otherwise.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">The given interval cannot
+        /// be null.</exception>
         public bool IsConnected(DenseInterval<T> other)
         {
+            SE.RequireNonNull(other, nameof(other));
             return (other.UpperEndpoint.IsInfinite || this.LowerEndpoint.IsInfinite ||
                 other.UpperEndpoint.Value!.CompareTo(this.LowerEndpoint.Value!) >= 0)
                 && (other.LowerEndpoint.IsInfinite || this.UpperEndpoint.IsInfinite ||
                 other.LowerEndpoint.Value!.CompareTo(this.UpperEndpoint.Value!) <= 0);
         }
 
+        /// <summary>
+        /// Returns <see langword="true"/> if and only if the given object
+        /// is a <see cref="DenseInterval{T}"/> with the same endpoints
+        /// as this interval. <see langword="false"/> otherwise.
+        /// </summary>
+        /// <param name="obj">The object to check.</param>
+        /// <returns><see langword="true"/> if and only if the given object
+        /// is a <see cref="DenseInterval{T}"/> with the same endpoints
+        /// as this interval. <see langword="false"/> otherwise.</returns>
         public override bool Equals(object? obj)
         {
             if (ReferenceEquals(this, obj))
@@ -215,9 +339,24 @@ namespace Cherry.Collections.Dense
         public override int GetHashCode() =>
             HashCode.Combine(LowerEndpoint, UpperEndpoint);
 
+        /// <summary>
+        /// A string representation of this interval in the standard
+        /// mathematical notation.
+        /// </summary>
+        /// <returns>A string representation of this interval in the standard
+        /// mathematical notation.</returns>
         public override string ToString() =>
             $"{LowerEndpoint}, {UpperEndpoint}";
 
+        /// <summary>
+        /// Gets the length of this interval using the given measure.
+        /// </summary>
+        /// <param name="measureFunction">The measure. This function
+        /// must be able to handle infinities if those are defined
+        /// for the <typeparamref name="T"/> in
+        /// <see cref="TypeConfiguration"/></param>
+        /// <returns>The length of this interval as measured
+        /// by the given function.</returns>
         public double GetLength(Func<T?, T?, double> measureFunction) => 
             measureFunction(LowerEndpoint.Value, UpperEndpoint.Value);
 
