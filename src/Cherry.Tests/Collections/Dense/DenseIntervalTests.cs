@@ -71,6 +71,10 @@ namespace Cherry.Tests.Collections.Dense
         [TestMethod]
         public void TestIntervalIntersection()
         {
+            Assert.ThrowsException<ArgumentNullException>(
+                () => new DI(LED.Inclusive(1), UED.Exclusive(2))
+                    .Intersect(null));
+
             var interval1 = new DI(LED.Inclusive(1), UED.Inclusive(2));
             var interval2 = new DI(LED.Inclusive(3), UED.Inclusive(4));
             var intersection1 = interval1.Intersect(interval2);
@@ -141,6 +145,13 @@ namespace Cherry.Tests.Collections.Dense
         [TestMethod]
         public void TestProperSubset()
         {
+            Assert.ThrowsException<ArgumentNullException>(
+                () => new DI(LED.Inclusive(1), UED.Exclusive(2))
+                    .IsProperSubsetOf(null));
+            Assert.ThrowsException<ArgumentNullException>(
+                () => new DI(LED.Inclusive(1), UED.Exclusive(2))
+                    .IsProperSupersetOf(null));
+
             var interval1 = new DI(LED.Inclusive(1), UED.Inclusive(2));
             Assert.IsFalse(interval1.IsProperSubsetOf(interval1));
 
@@ -160,6 +171,14 @@ namespace Cherry.Tests.Collections.Dense
         [TestMethod]
         public void TestSubset()
         {
+            Assert.ThrowsException<ArgumentNullException>(
+                () => new DI(LED.Inclusive(1), UED.Exclusive(2))
+                    .IsSubsetOf(null));
+
+            Assert.ThrowsException<ArgumentNullException>(
+                () => new DI(LED.Inclusive(1), UED.Exclusive(2))
+                    .IsSupersetOf(null));
+
             var interval1 = new DI(LED.Inclusive(1), UED.Inclusive(2));
             Assert.IsTrue(interval1.IsSubsetOf(interval1));
 
@@ -179,6 +198,10 @@ namespace Cherry.Tests.Collections.Dense
         [TestMethod]
         public void TestOverlap()
         {
+            Assert.ThrowsException<ArgumentNullException>(
+                () => new DI(LED.Inclusive(1), UED.Exclusive(2))
+                    .Overlaps(null));
+
             var interval1 = new DI(LED.Inclusive(1), UED.Inclusive(2));
             Assert.IsTrue(interval1.Overlaps(interval1));
 
@@ -199,7 +222,27 @@ namespace Cherry.Tests.Collections.Dense
             Assert.IsFalse(interval5.Overlaps(interval1));
         }
 
-        private void RunContainsTests<T>(DenseInterval<T> interval, 
+        [TestMethod]
+        public void TestConnected()
+        {
+            Assert.ThrowsException<ArgumentNullException>(
+                () => new DI(LED.Inclusive(1), UED.Exclusive(2))
+                    .IsConnected(null));
+
+            Assert.IsTrue(new DI(LED.Inclusive(1), UED.Exclusive(2))
+                .IsConnected(new DI(LED.Inclusive(2), UED.Exclusive(3))));
+            Assert.IsTrue(new DI(LED.Inclusive(2), UED.Exclusive(3))
+                .IsConnected(new DI(LED.Inclusive(1), UED.Exclusive(2))));
+
+            Assert.IsFalse(new DI(LED.Inclusive(1), UED.Exclusive(2))
+                .IsConnected(new DI(LED.Exclusive(2), UED.Exclusive(3))));
+            Assert.IsFalse(new DI(LED.Exclusive(2), UED.Exclusive(3))
+                .IsConnected(new DI(LED.Inclusive(1), UED.Exclusive(2))));
+
+        }
+
+        private static void RunContainsTests<T>(
+            DenseInterval<T> interval, 
             IEnumerable<T> containedPoints, 
             IEnumerable<T> notContainedPoints) where T : IComparable<T>
         {

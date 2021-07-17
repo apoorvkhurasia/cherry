@@ -295,24 +295,44 @@ namespace Cherry.Collections.Dense
         }
 
         /// <summary>
-        /// Returns <see langword="true" /> if and only if the two intervals
-        /// overlap or when their boundary points coincide even if the
-        /// intersection has a 0 measure. <see langword="false" /> otherwise.
+        /// Returns <see langword="true" /> if and only if the union of two
+        /// intervals itself is an interval. <see langword="false" />
+        /// otherwise.
         /// </summary>
         /// <param name="other">The interval to check.</param>
-        /// <returns>Returns <see langword="true" /> if and only if the two intervals
-        /// overlap or when their boundary points coincide even if the
-        /// intersection has a 0 measure. <see langword="false" /> otherwise.
+        /// <returns>Returns <see langword="true" /> if and only if the union of
+        /// two intervals itself is an interval. <see langword="false" />
+        /// otherwise.
         /// </returns>
         /// <exception cref="ArgumentNullException">The given interval cannot
         /// be null.</exception>
         public bool IsConnected(DenseInterval<T> other)
         {
             SE.RequireNonNull(other, nameof(other));
-            return (other.UpperEndpoint.IsInfinite || this.LowerEndpoint.IsInfinite ||
-                other.UpperEndpoint.Value!.CompareTo(this.LowerEndpoint.Value!) >= 0)
-                && (other.LowerEndpoint.IsInfinite || this.UpperEndpoint.IsInfinite ||
-                other.LowerEndpoint.Value!.CompareTo(this.UpperEndpoint.Value!) <= 0);
+            var first = other;
+            var second = this;
+            if (this.LowerEndpoint < other.LowerEndpoint)
+            {
+                first = this;
+                second = other;
+            }
+
+            if (first.UpperEndpoint.IsInfinite ||
+                second.LowerEndpoint.IsInfinite)
+            {
+                return true;
+            }
+            else if (first.UpperEndpoint.IsInclusive ||
+                     second.LowerEndpoint.IsInclusive)
+            {
+                return first.UpperEndpoint.Value!
+                    .CompareTo(second.LowerEndpoint.Value) >= 0;
+            }
+            else
+            {
+                return first.UpperEndpoint.Value!
+                    .CompareTo(second.LowerEndpoint.Value) > 0;
+            }
         }
 
         /// <summary>
