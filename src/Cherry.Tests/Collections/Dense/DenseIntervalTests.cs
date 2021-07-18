@@ -1,11 +1,11 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using LED = Cherry.Collections.Dense.LowerEndpoint<double>;
-using UED = Cherry.Collections.Dense.UpperEndpoint<double>;
-using DI = Cherry.Collections.Dense.DenseInterval<double>;
-using System;
-using System.Collections.Generic;
 using Cherry.Collections.Dense;
 using Cherry.Math;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections.Generic;
+using DI = Cherry.Collections.Dense.DenseInterval<double>;
+using LED = Cherry.Collections.Dense.LowerEndpoint<double>;
+using UED = Cherry.Collections.Dense.UpperEndpoint<double>;
 
 namespace Cherry.Tests.Collections.Dense
 {
@@ -33,7 +33,7 @@ namespace Cherry.Tests.Collections.Dense
         {
             var upToOne = new DI(LED.NegativeInfinity(), UED.Inclusive(1));
             Assert.IsFalse(upToOne.IsEmpty);
-            RunContainsTests(upToOne, 
+            RunContainsTests(upToOne,
                 new double[] { 1 - EPSILON, 1, -1 },
                 new double[] { 1 + EPSILON, double.NegativeInfinity, 2 });
 
@@ -49,7 +49,7 @@ namespace Cherry.Tests.Collections.Dense
                 new double[] { 1 + EPSILON, 2 },
                 new double[] { 1 - EPSILON, 1, double.PositiveInfinity });
 
-            var moreThanOrEqOne = 
+            var moreThanOrEqOne =
                 new DI(LED.Inclusive(1), UED.PositiveInfinity());
             Assert.IsFalse(moreThanOrEqOne.IsEmpty);
             RunContainsTests(moreThanOrEqOne,
@@ -83,7 +83,7 @@ namespace Cherry.Tests.Collections.Dense
             RunContainsTests(intersection1,
                 new double[] { },
                 new double[] { 1, 1.5, 2 - EPSILON, 2, 3, 3.5, 4 - EPSILON, 4,
-                               1 - EPSILON, 2 + EPSILON, 
+                               1 - EPSILON, 2 + EPSILON,
                                3 - EPSILON, 4 + EPSILON});
 
             //Reflexivity
@@ -239,14 +239,38 @@ namespace Cherry.Tests.Collections.Dense
             Assert.IsFalse(new DI(LED.Exclusive(2), UED.Exclusive(3))
                 .IsConnected(new DI(LED.Inclusive(1), UED.Exclusive(2))));
 
+            Assert.IsTrue(new DI(LED.Inclusive(1), UED.PositiveInfinity())
+                .IsConnected(new DI(LED.Exclusive(3), UED.Inclusive(15))));
+
+            Assert.IsTrue(new DI(LED.Exclusive(3), UED.Inclusive(15))
+                .IsConnected(new DI(LED.Inclusive(1), UED.PositiveInfinity())));
+
+            Assert.IsFalse(new DI(LED.Exclusive(3), UED.Inclusive(15))
+                .IsConnected(new DI(LED.NegativeInfinity(), UED.Inclusive(2))));
+
+            Assert.IsTrue(new DI(LED.NegativeInfinity(), UED.Inclusive(15))
+                .IsConnected(new DI(LED.NegativeInfinity(), UED.Inclusive(2))));
+        }
+
+        [TestMethod]
+        public void TestIntervalEquality()
+        {
+            TestHelper.RunEqualityTests<DI>(DI.Universe,
+                new[] { new DI(LED.NegativeInfinity(), UED.PositiveInfinity()) },
+                new[] { new DI(LED.Inclusive(2), UED.Exclusive(3)) });
+            Assert.AreEqual(DI.Universe, DI.Universe);
+            Assert.AreEqual(new DI(LED.Inclusive(2), UED.Exclusive(3)),
+                new DI(LED.Inclusive(2), UED.Exclusive(3)));
+            Assert.AreNotEqual(new DI(LED.Inclusive(2), UED.Exclusive(3)),
+                new DI(LED.Inclusive(2), UED.Exclusive(3)));
         }
 
         private static void RunContainsTests<T>(
-            DenseInterval<T> interval, 
-            IEnumerable<T> containedPoints, 
+            DenseInterval<T> interval,
+            IEnumerable<T> containedPoints,
             IEnumerable<T> notContainedPoints) where T : IComparable<T>
         {
-            foreach(var point in containedPoints)
+            foreach (var point in containedPoints)
             {
                 Assert.IsTrue(interval.Contains(point),
                     $"Failed. Expected {interval} to contain {point}");

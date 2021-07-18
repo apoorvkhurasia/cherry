@@ -96,7 +96,7 @@ namespace Cherry.Collections.Dense
 
         /// <summary>
         /// <see langword="true"></see> if and only if this set contains every
-        /// element of type <typeparamref name="T"/>. 
+        /// element of type <typeparamref name="T"/>.
         /// <see langword="false"/> otherwise.
         /// </summary>
         public bool IsUniverse =>
@@ -113,11 +113,11 @@ namespace Cherry.Collections.Dense
         /// <returns><see langword="true"></see> if and only if this set
         /// contains the given element. <see langword="false"/> otherwise.
         /// </returns>
-        public bool Contains(T value) => 
+        public bool Contains(T value) =>
             LowerEndpoint <= value && UpperEndpoint >= value;
 
         /// <summary>
-        /// This method creates a new set which contains every element that 
+        /// This method creates a new set which contains every element that
         /// is contained in both this interval and the given interval.
         /// </summary>
         /// <param name="other">The other interval. Cannot be null.</param>
@@ -377,8 +377,7 @@ namespace Cherry.Collections.Dense
         /// <see cref="TypeConfiguration"/></param>
         /// <returns>The length of this interval as measured
         /// by the given function.</returns>
-        public double GetLength(Func<T?, T?, double> measureFunction) => 
+        public double GetLength(Func<T?, T?, double> measureFunction) =>
             measureFunction(LowerEndpoint.Value, UpperEndpoint.Value);
-
     }
 }
