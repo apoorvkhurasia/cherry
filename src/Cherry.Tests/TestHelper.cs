@@ -31,9 +31,9 @@ namespace Cherry.Tests
 
             foreach (var neq in candidatesNonEqual)
             {
-                Assert.IsTrue(neq.Equals(obj), 
+                Assert.IsFalse(neq.Equals(obj), 
                     $"{neq} was found equal to {obj}");
-                Assert.IsTrue(obj.Equals(neq),
+                Assert.IsFalse(obj.Equals(neq),
                     $"{neq} was found equal to {obj}");
             }
         }

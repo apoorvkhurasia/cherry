@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
 
 using SE = Cherry.StandardExceptions;
@@ -15,11 +16,25 @@ namespace Cherry.Collections.Dense
         where T : IComparable<T>
     {
         private readonly ImmutableList<DenseInterval<T>> _disjointIntervals;
+        private int _memoizedHashCode = 0;
+        private string? _stringRepresentation;
+
+        private readonly object _hashCodeLock = new();
+        private readonly object _stringRepLock = new();
 
         #region Factory Methods
 
+        /// <summary>
+        /// Creates a <see cref="DenseOrderedSet{T}"/> from a single interval.
+        /// </summary>
+        /// <param name="interval">The interval.</param>
+        /// <returns>A <see cref="DenseOrderedSet{T}"/> created from the given
+        /// interval.</returns>
+        /// <exception cref="ArgumentNullException">The given interval
+        /// cannot be null.</exception>
         public static DenseOrderedSet<T> FromInterval(DenseInterval<T> interval)
         {
+            SE.RequireNonNull(interval, nameof(interval));
             if (interval.IsEmpty)
             {
                 return DenseOrderedSet<T>.Empty;
@@ -34,9 +49,19 @@ namespace Cherry.Collections.Dense
             }
         }
 
+        /// <summary>
+        /// Creates a <see cref="DenseOrderedSet{T}"/> from the complement
+        /// of the given interval.
+        /// </summary>
+        /// <param name="interval">The given interval.</param>
+        /// <returns>A <see cref="DenseOrderedSet{T}"/> from the complement
+        /// of the given interval. </returns>
+        /// <exception cref="ArgumentNullException">The given interval
+        /// cannot be null.</exception>
         public static DenseOrderedSet<T> AsComplementOf(
             DenseInterval<T> interval)           
         {
+            SE.RequireNonNull(interval, nameof(interval));
             if (interval.IsUniverse)
             {
                 return DenseOrderedSet<T>.Empty;
@@ -81,14 +106,32 @@ namespace Cherry.Collections.Dense
             }
         }
 
+        /// <summary>
+        /// The empty set which contains nothing.
+        /// </summary>
         public static DenseOrderedSet<T> Empty { get; }
             = new(Array.Empty<DenseInterval<T>>());
 
+        /// <summary>
+        /// The universe set which contains all elements of type
+        /// <typeparamref name="T"/>.
+        /// </summary>
         public static DenseOrderedSet<T> Universe { get; }
             = new(Enumerable.Repeat(DenseInterval<T>.Universe, 1));
 
+        /// <summary>
+        /// Creates a <see cref="DenseOrderedSet{T}"/> from the given intervals.
+        /// Any and all connected intervals will be collapsed into a single
+        /// interval spanning them.
+        /// </summary>
+        /// <param name="of">The intervals.</param>
+        /// <returns>A <see cref="DenseOrderedSet{T}"/> created from the given
+        /// intervals.</returns>
+        /// <exception cref="ArgumentNullException">The given interval
+        /// enumberable cannot be null.</exception>
         public static DenseOrderedSet<T> Union(IEnumerable<DenseInterval<T>> of)
         {
+            SE.RequireNonNull(of, nameof(of));
             List<DenseInterval<T>> nonEmpty = new();
             foreach (var interval in of)
             {
@@ -104,23 +147,28 @@ namespace Cherry.Collections.Dense
             return new(nonEmpty);
         }
 
+        /// <summary>
+        /// Creates a <see cref="DenseOrderedSet{T}"/> from the intersection
+        /// of the given intervals.
+        /// </summary>
+        /// <param name="of">The intervals.</param>
+        /// <returns>A <see cref="DenseOrderedSet{T}"/> created from the
+        /// intersection of the given intervals.</returns>
+        /// <exception cref="ArgumentNullException">The given interval
+        /// enumberable cannot be null.</exception>
         public static DenseOrderedSet<T> Intersection(
             IEnumerable<DenseInterval<T>> of)
         {
-            List<DenseInterval<T>> nonEmpty = new();
+            var intersection = DenseInterval<T>.Universe;
             foreach (var interval in of)
             {
-                if (interval.IsEmpty)
+                if (interval.IsEmpty || intersection.IsEmpty)
                 {
-                    return DenseOrderedSet<T>.Empty;
+                    return Empty;
                 }
-                else if (!interval.IsUniverse)
-                {
-                    nonEmpty.AddRange(
-                        AsComplementOf(interval).AsDisjointIntervals());
-                }
+                intersection = intersection.Intersect(interval);
             }
-            return new(nonEmpty);
+            return FromInterval(intersection);
         }
 
         #endregion
@@ -222,6 +270,15 @@ namespace Cherry.Collections.Dense
             return false;
         }
 
+        /// <summary>
+        /// Returns another set which contains elements of this set and the
+        /// given set.
+        /// </summary>
+        /// <param name="other">Another set.</param>
+        /// <returns>A set which contains elements of this set and the
+        /// given set.</returns>
+        /// <exception cref="ArgumentNullException">The given set cannot be
+        /// null.</exception>
         public IDenseOrderedSet<T> Union(IDenseOrderedSet<T> other)
         {
             SE.RequireNonNull(other, nameof(other));
@@ -230,6 +287,15 @@ namespace Cherry.Collections.Dense
                 other.AsDisjointIntervals()));
         }
 
+        /// <summary>
+		/// Returns another set which contains elements belonging to
+		/// both this set and the given set.
+		/// </summary>
+		/// <param name="another">Another set.</param>
+		/// <returns>A set which contains elements belonging to
+		/// both this set and the given set.</returns>
+        /// <exception cref="ArgumentNullException">The given set cannot be
+        /// null.</exception>
         public IDenseOrderedSet<T> Intersect(IDenseOrderedSet<T> another)
         {
             SE.RequireNonNull(another, nameof(another));
@@ -289,17 +355,26 @@ namespace Cherry.Collections.Dense
         public bool Overlaps(IDenseOrderedSet<T> other)
         {
             SE.RequireNonNull(other, nameof(other));
-            foreach(var mine in AsDisjointIntervals())
+            var myIntervals = AsDisjointIntervals();
+            var theirIntervals = other.AsDisjointIntervals();
+            for (int i = 0; i < myIntervals.Count; )
             {
-                foreach(var their in other.AsDisjointIntervals())
+                var mine = myIntervals[i];
+                for (int j = 0; j < theirIntervals.Count; )
                 {
-                    if (mine.IsUpper(their))
-                    {
-                        break; //No point going further
-                    }
-                    else if (mine.Overlaps(their))
+                    var their = theirIntervals[j];
+                    if (mine.Overlaps(their))
                     {
                         return true;
+                    }
+                    else if (mine.IsLower(their))
+                    {
+                        i++;
+                    }
+                    else
+                    {
+                        Debug.Assert(their.IsLower(mine));
+                        j++;
                     }
                 }
             }
@@ -308,27 +383,115 @@ namespace Cherry.Collections.Dense
 
         public bool SetEquals(IDenseOrderedSet<T> other) 
         {
-            SE.RequireNonNull(other, nameof(other));
-            return IsSubsetOf(other) && other.IsSubsetOf(this);
+            if (other is null)
+            {
+                return false;
+            }
+            else if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            var myIntervals = AsDisjointIntervals();
+            var theirIntervals = other.AsDisjointIntervals();
+            if (myIntervals.Count != theirIntervals.Count)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < myIntervals.Count; i++)
+            {
+                if (!myIntervals[i].Equals(theirIntervals[i]))
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         public override int GetHashCode()
         {
-            var hc = new HashCode();
-            _disjointIntervals.ForEach(hc.Add);
-            return hc.ToHashCode();
+            if (_memoizedHashCode == 0)
+            {
+                lock (_hashCodeLock)
+                {
+                    var hashCode = new HashCode();
+                    _disjointIntervals.ForEach(
+                        interval => hashCode.Add(interval.GetHashCode()));
+                    _memoizedHashCode = hashCode.ToHashCode();
+                }
+            }
+            return _memoizedHashCode;
         }
 
+        /// <summary>
+        /// An object is equal to this instance if and only if it is a
+        /// <see cref="DenseOrderedSet{T}"/> containing all elements of this set
+        /// and if this set contains all elements contained in the given object.
+        /// </summary>
+        /// <param name="obj">The object to check.</param>
+        /// <returns><see langword="true" /> if and only if the given
+        /// object is a <see cref="DenseOrderedSet{T}"/> equal in the
+        /// mathematical sense to this set. <see langword="false" /> otherwise.
+        /// </returns>
         public override bool Equals(object? obj) => 
             obj is DenseOrderedSet<T> set && SetEquals(set);
 
+        /// <summary>
+        /// Returns a string representation of this set in the standard
+        /// mathematical notation.
+        /// </summary>
+        /// <returns>The string representation of this set in the standard
+        /// mathematical notation.</returns>
         public override string ToString()
         {
-            return string.Join(" ∪ ", _disjointIntervals);
+            if (_stringRepresentation == null)
+            {
+                lock (_stringRepLock)
+                {
+                    _stringRepresentation =
+                        string.Join(" ∪ ", _disjointIntervals);
+                }
+            }
+            return _stringRepresentation;
         }
 
+        /// <summary>
+        /// Gets the length of this set using the given measure.
+        /// </summary>
+        /// <param name="measureFunction">The measure. This function
+        /// should be able to handle infinities as configured in 
+        /// <see cref="TypeConfiguration"/>.</param>
+        /// <returns>The length of this set.</returns>
+        /// <exception cref="ArgumentNullException">The measure function
+        /// cannot be null.</exception>
         public double GetLength(Func<T?, T?, double> measureFunction) => 
             _disjointIntervals.Sum(i => i.GetLength(measureFunction));
 
+        public IEnumerable<T> Sample(Func<T, T> generator)
+        {
+            if (IsEmpty)
+            {
+                yield break;
+            }
+
+            var intervals = AsDisjointIntervals();
+            var start = intervals.First().LowerEndpoint;
+            var end = intervals.Last().UpperEndpoint;
+            T item;
+            if (!start.IsInfinite ||
+                !TypeConfiguration.TryGetNegativeInfinity(out item))
+            {
+                item = start.Value!;
+            }
+            while (item <= end)
+            {
+                if (Contains(item))
+                {
+                    yield return item;
+                }
+                item = generator(item);
+            }
+        }
     }
 }

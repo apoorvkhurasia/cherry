@@ -41,6 +41,11 @@ namespace Cherry.Tests.Collections.Dense
                 new[] { -20e10, -20, 0, 1 - EPSILON, 5, 6, 20, 20e13},
                 new[] { 1, 2, 2.5, 3, 5 - EPSILON });
 
+            var cmpl1 = DenseOrderedSet<double>.AsComplementOf(
+                new DenseInterval<double>(LED.Inclusive(1), UED.Exclusive(5)));
+            TestHelper.RunEqualityTests(cmpl, new[] { cmpl1 },
+                Array.Empty<object>());
+
             var set2 = Of(LED.NegativeInfinity(), UED.Inclusive(3));
             var cmpl2 = set2.Complement();
             var cmplIntvls2 = cmpl2.AsDisjointIntervals();

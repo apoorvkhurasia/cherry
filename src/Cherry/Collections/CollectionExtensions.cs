@@ -60,17 +60,5 @@ namespace Cherry.Collections
 #pragma warning restore S112 // General exceptions should never be thrown
             }
         }
-
-        /// <summary>
-        /// Returns an <see cref="IEnumerable{T}"/> with the given element
-        /// appended to the end of the given <see cref="IEnumerable{T}"/>.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="enumerable">The original sequence.</param>
-        /// <param name="item">The item to append to the original
-        /// sequence.</param>
-        public static IEnumerable<T> Append<T>(
-            this IEnumerable<T> enumerable, T item) =>
-            Enumerable.Concat(enumerable, Enumerable.Repeat(item, 1));
     }
 }

@@ -6,23 +6,11 @@ namespace  Cherry.Collections.Dense
 {
 	/// <summary>
 	/// Represents a set that holds uncountably many items. The items in the
-    /// set must have a notion of ordering and must be dense in the mathematical
-    /// sense. The latter requirement means that between any two items there
-    /// be an uncountably infinite number of more items. Integers do not qualify
-    /// for this but real numbers do. There are two ways in items can be
-    /// ordered:
-	/// <list type="bullet">
-	///		<item>They can implement <see cref="IComparable{T}"/></item>
-    ///		<item>An <see cref="IComparer{T}"/> or <see cref="Comparison{T}"/>
-    ///		can be provided by the caller. Care must be taken to use the
-    ///		same comparision method consistently in all places where these
-    ///		items can be ordered. Implementations provided by Cherry will
-    ///		fail fast where possible when different comparision methods will
-    ///		be mixed for the same type of items. However this is not a hard
-    ///		guarentee as these implementations will interact with objects
-    ///		not defined in this library.
-    ///		</item>
-    ///	</list>
+    /// set must implement <see cref="IComparable{T}"/> and must be dense in the
+    /// mathematical sense. The latter requirement means that between any two
+    /// items there be an uncountably infinite number of more items of the same
+    /// type. Integers are not dense but real numbers and even rational
+    /// numbers are dense.
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	public interface IDenseOrderedSet<T> where T : IComparable<T>
@@ -113,7 +101,7 @@ namespace  Cherry.Collections.Dense
         /// given set.</returns>
         IDenseOrderedSet<T> Union(IDenseOrderedSet<T> other);
 
-		// <summary>
+		/// <summary>
 		/// Returns another set which contains elements belonging to
 		/// both this set and the given set.
 		/// </summary>
@@ -123,12 +111,14 @@ namespace  Cherry.Collections.Dense
 		IDenseOrderedSet<T> Intersect(IDenseOrderedSet<T> another);
 
 		/// <summary>
-        /// Gets a set of disjoint intervals whose union makes up
-        /// this set. This set is not unique and any such set can be returned
-        /// by implementations. There is no guarentee that the same set will
-        /// be returned by the same instance on repeated calls.
-        /// </summary>
-        /// <returns></returns>
+		/// Returns a list of all disjoint intervals whose union makes up
+		/// this set. The intervals are ordered from low to high in
+		/// the sense of
+		/// <see cref="DenseInterval{T}.IsLower(DenseInterval{T})"/> and
+		/// <see cref="DenseInterval{T}.IsUpper(DenseInterval{T})"/>.
+		/// </summary>
+		/// <returns>An ordered immutable list of disjoint intervals whose union
+		/// makes up this set. Intervals are ordered low to high.</returns>
 		ImmutableList<DenseInterval<T>> AsDisjointIntervals();
 
         /// <summary>
@@ -139,5 +129,19 @@ namespace  Cherry.Collections.Dense
         /// <see cref="TypeConfiguration"/>.</param>
         /// <returns>The length of this set.</returns>
         double GetLength(Func<T?, T?, double> measureFunction);
+
+		/// <summary>
+        /// Returns an ordered sequence of elements contained in this set
+        /// spaced in accordance with the given sampler function.
+        /// </summary>
+        /// <param name="generator">The function which generates an element
+        /// given another element. from another element by the distance wanted
+        /// by the caller.</param>
+        /// <returns>Elements sampled from this set. The first element
+        /// is either the lowest element in this set if this set is closed
+        /// or the smallest element in this set seperated from the lowest
+        /// boundary of this set by the distance controlled by the generator.
+        /// </returns>
+		IEnumerable<T> Sample(Func<T, T> generator);
     }
 }

@@ -258,11 +258,57 @@ namespace Cherry.Tests.Collections.Dense
             TestHelper.RunEqualityTests<DI>(DI.Universe,
                 new[] { new DI(LED.NegativeInfinity(), UED.PositiveInfinity()) },
                 new[] { new DI(LED.Inclusive(2), UED.Exclusive(3)) });
-            Assert.AreEqual(DI.Universe, DI.Universe);
-            Assert.AreEqual(new DI(LED.Inclusive(2), UED.Exclusive(3)),
-                new DI(LED.Inclusive(2), UED.Exclusive(3)));
-            Assert.AreNotEqual(new DI(LED.Inclusive(2), UED.Exclusive(3)),
-                new DI(LED.Inclusive(2), UED.Exclusive(3)));
+
+            TestHelper.RunEqualityTests<DI>(
+                new DI(LED.Inclusive(2), UED.Inclusive(3)),
+                new[] { new DI(LED.Inclusive(2), UED.Inclusive(3)) },
+                new[] { new DI(LED.Inclusive(2), UED.Exclusive(3)) });
+
+            TestHelper.RunEqualityTests<DI>(
+                new DI(LED.Inclusive(2), UED.Inclusive(3)),
+                new[] { new DI(LED.Inclusive(2), UED.Inclusive(3)) },
+                new[] { new DI(LED.Exclusive(2), UED.Inclusive(3)) });
+        }
+
+        [TestMethod]
+        public void TestOrdering()
+        {
+            var int1 = new DI(LED.Inclusive(2), UED.Inclusive(3));
+            var int2 = new DI(LED.Inclusive(0), UED.Exclusive(2));
+            var int3 = new DI(LED.Exclusive(2), UED.Inclusive(7));
+            var int4 = new DI(LED.NegativeInfinity(), UED.Inclusive(7));
+            Assert.IsTrue(int2.IsLower(int1));
+            Assert.IsTrue(int1.IsUpper(int2));
+
+            //Self 
+            Assert.IsFalse(int1.IsUpper(int1));
+            Assert.IsFalse(int1.IsLower(int1));
+
+            Assert.IsFalse(int1.IsLower(int3));
+            Assert.IsFalse(int1.IsLower(int4));
+
+            Assert.IsFalse(int1.IsUpper(int3));
+            Assert.IsFalse(int1.IsUpper(int4));
+        }
+
+        [TestMethod]
+        public void TestPointPosition()
+        {
+            var int1 = new DI(LED.Inclusive(2), UED.Inclusive(3));
+            var int2 = new DI(LED.Exclusive(2), UED.Exclusive(3));
+            Assert.AreEqual(
+                PointPosition.AT_LOWER_ENDPOINT, int1.GetPosition(2));
+            Assert.AreEqual(PointPosition.LOWER, int2.GetPosition(2));
+            Assert.AreEqual(PointPosition.WITHIN, int1.GetPosition(2.5));
+            Assert.AreEqual(PointPosition.WITHIN, int2.GetPosition(2.5));
+            Assert.AreEqual(
+                PointPosition.AT_UPPER_ENDPOINT, int1.GetPosition(3));
+            Assert.AreEqual(PointPosition.UPPER, int2.GetPosition(3));
+
+            Assert.AreEqual(
+                PointPosition.UPPER, int1.GetPosition(double.PositiveInfinity));
+            Assert.AreEqual(
+                PointPosition.UPPER, int2.GetPosition(double.PositiveInfinity));
         }
 
         private static void RunContainsTests<T>(
